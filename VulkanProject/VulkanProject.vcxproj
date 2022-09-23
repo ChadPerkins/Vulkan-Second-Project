@@ -143,12 +143,14 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\VE_Device.cpp" />
     <ClCompile Include="src\VE_Pipeline.cpp" />
+    <ClCompile Include="src\VE_SwapChain.cpp" />
     <ClCompile Include="src\VE_Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\VE_Device.h" />
     <ClInclude Include="src\VE_Pipeline.h" />
+    <ClInclude Include="src\VE_SwapChain.h" />
     <ClInclude Include="src\VE_Window.h" />
   </ItemGroup>
   <ItemGroup>

@@ -16,6 +16,7 @@ namespace VulkanEngine {
 		VEWindow& operator=(const VEWindow&) = delete;
 
 		bool Close() { return glfwWindowShouldClose(m_Window); }
+		VkExtent2D GetExtent() { return { m_Width, m_Height }; }
 
 		void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 	private:
@@ -24,8 +25,8 @@ namespace VulkanEngine {
 	private:
 		GLFWwindow* m_Window;
 		std::string m_Title;
-		const int m_Width;
-		const int m_Height;
+		const uint32_t m_Width;
+		const uint32_t m_Height;
 
 	};
 }
