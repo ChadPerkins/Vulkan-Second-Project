@@ -10,7 +10,8 @@ namespace VulkanEngine {
 	VEPipeline::VEPipeline(VEDevice& device,
 		const std::string& vertShaderPath,
 		const std::string& fragShaderPath,
-		const PipelineConfigInfo configInfo) : m_Device{ device }
+		const PipelineConfigInfo configInfo)
+		: m_Device{ device }
 	{
 		CreateGraphicsPipeline(vertShaderPath, fragShaderPath, configInfo);
 	}
@@ -122,15 +123,21 @@ namespace VulkanEngine {
 	void VEPipeline::CreateShaderModule(const std::vector<char>& shader, VkShaderModule* shaderModule)
 	{
 		VkShaderModuleCreateInfo info = {};
-		info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		info.codeSize = shader.size();
+
+		info.sType												= VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		info.codeSize											= shader.size();
 		// Vulkan expects the info to be a uint32
-		info.pCode = reinterpret_cast<const uint32_t*>(shader.data());
+		info.pCode												= reinterpret_cast<const uint32_t*>(shader.data());
 
 		if (vkCreateShaderModule(m_Device.Device(), &info, nullptr, shaderModule) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to create shader module.");
 		}
+	}
+
+	void VEPipeline::Bind(VkCommandBuffer commandBuffer)
+	{
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 	}
 
 	PipelineConfigInfo VEPipeline::DefaultPipelineConfigInfo(uint32_t width, uint32_t height)

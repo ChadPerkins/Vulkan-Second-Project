@@ -60,15 +60,13 @@ namespace VulkanEngine {
 
     VkResult VESwapChain::AcquireNextImage(uint32_t* imageIndex)
     {
-        vkWaitForFences(
-            m_Device.Device(),
+        vkWaitForFences(m_Device.Device(),
             1,
             &m_InFlightFences[m_CurrentFrame],
             VK_TRUE,
             std::numeric_limits<uint64_t>::max());
 
-        VkResult result = vkAcquireNextImageKHR(
-            m_Device.Device(),
+        VkResult result = vkAcquireNextImageKHR(m_Device.Device(),
             m_SwapChain,
             std::numeric_limits<uint64_t>::max(),
             m_ImageAvailableSemaphores[m_CurrentFrame],  // must be a not signaled semaphore
@@ -84,6 +82,7 @@ namespace VulkanEngine {
         {
             vkWaitForFences(m_Device.Device(), 1, &m_ImagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
         }
+
         m_ImagesInFlight[*imageIndex]                           = m_InFlightFences[m_CurrentFrame];
 
         VkSubmitInfo submitInfo = {};
@@ -104,8 +103,8 @@ namespace VulkanEngine {
         submitInfo.pSignalSemaphores                            = signalSemaphores;
 
         vkResetFences(m_Device.Device(), 1, &m_InFlightFences[m_CurrentFrame]);
-        if (vkQueueSubmit(m_Device.GraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) !=
-            VK_SUCCESS)
+
+        if (vkQueueSubmit(m_Device.GraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to submit draw command buffer!");
         }
@@ -139,8 +138,8 @@ namespace VulkanEngine {
         VkExtent2D extent                                       = ChooseSwapExtent(swapChainSupport.Capabilities);
 
         uint32_t imageCount                                     = swapChainSupport.Capabilities.minImageCount + 1;
-        if (swapChainSupport.Capabilities.maxImageCount > 0 &&
-            imageCount > swapChainSupport.Capabilities.maxImageCount)
+
+        if (swapChainSupport.Capabilities.maxImageCount > 0 && imageCount > swapChainSupport.Capabilities.maxImageCount)
         {
             imageCount = swapChainSupport.Capabilities.maxImageCount;
         }
@@ -181,7 +180,8 @@ namespace VulkanEngine {
 
         createInfo.oldSwapchain                                 = VK_NULL_HANDLE;
 
-        if (vkCreateSwapchainKHR(m_Device.Device(), &createInfo, nullptr, &m_SwapChain) != VK_SUCCESS) {
+        if (vkCreateSwapchainKHR(m_Device.Device(), &createInfo, nullptr, &m_SwapChain) != VK_SUCCESS)
+        {
             throw std::runtime_error("failed to create swap chain!");
         }
 
@@ -200,6 +200,7 @@ namespace VulkanEngine {
     void VESwapChain::CreateImageViews()
     {
         m_SwapChainImageViews.resize(m_SwapChainImages.size());
+
         for (size_t i = 0; i < m_SwapChainImages.size(); i++)
         {
             VkImageViewCreateInfo viewInfo = {};
@@ -215,7 +216,8 @@ namespace VulkanEngine {
             viewInfo.subresourceRange.layerCount                = 1;
 
             if (vkCreateImageView(m_Device.Device(), &viewInfo, nullptr, &m_SwapChainImageViews[i]) !=
-                VK_SUCCESS) {
+                VK_SUCCESS)
+            {
                 throw std::runtime_error("failed to create texture image view!");
             }
         }
@@ -295,6 +297,7 @@ namespace VulkanEngine {
     void VESwapChain::CreateFramebuffers()
     {
         m_SwapChainFramebuffers.resize(ImageCount());
+
         for (size_t i = 0; i < ImageCount(); i++)
         {
             std::array<VkImageView, 2> attachments              = { m_SwapChainImageViews[i], m_DepthImageViews[i] };
@@ -366,7 +369,8 @@ namespace VulkanEngine {
             viewInfo.subresourceRange.baseArrayLayer = 0;
             viewInfo.subresourceRange.layerCount = 1;
 
-            if (vkCreateImageView(m_Device.Device(), &viewInfo, nullptr, &m_DepthImageViews[i]) != VK_SUCCESS) {
+            if (vkCreateImageView(m_Device.Device(), &viewInfo, nullptr, &m_DepthImageViews[i]) != VK_SUCCESS)
+            {
                 throw std::runtime_error("failed to create texture image view!");
             }
         }
@@ -388,10 +392,8 @@ namespace VulkanEngine {
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
-            if (vkCreateSemaphore(m_Device.Device(), &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]) !=
-                VK_SUCCESS ||
-                vkCreateSemaphore(m_Device.Device(), &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) !=
-                VK_SUCCESS ||
+            if (vkCreateSemaphore(m_Device.Device(), &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]) != VK_SUCCESS ||
+                vkCreateSemaphore(m_Device.Device(), &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS ||
                 vkCreateFence(m_Device.Device(), &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS)
             {
                 throw std::runtime_error("failed to create synchronization objects for a frame!");
@@ -444,11 +446,11 @@ namespace VulkanEngine {
         else
         {
             VkExtent2D actualExtent = m_WindowExtent;
-            actualExtent.width = std::max(
-                capabilities.minImageExtent.width,
-                std::min(capabilities.maxImageExtent.width, actualExtent.width));
-            actualExtent.height = std::max(
-                capabilities.minImageExtent.height,
+
+            actualExtent.width = std::max(capabilities.minImageExtent.width,
+                std::min(capabilities.maxImageExtent.width,  actualExtent.width));
+
+            actualExtent.height = std::max(capabilities.minImageExtent.height,
                 std::min(capabilities.maxImageExtent.height, actualExtent.height));
 
             return actualExtent;
