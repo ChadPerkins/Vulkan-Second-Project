@@ -60,15 +60,15 @@ namespace VulkanEngine {
 
     VEDevice::~VEDevice()
     {
-        vkDestroyCommandPool(m_Device_, m_CommandPool, nullptr);
-        vkDestroyDevice(m_Device_, nullptr);
+        vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
+        vkDestroyDevice(m_Device, nullptr);
 
         if (EnableValidationLayers)
         {
             DestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
         }
 
-        vkDestroySurfaceKHR(m_Instance, m_Surface_, nullptr);
+        vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
         vkDestroyInstance(m_Instance, nullptr);
     }
 
@@ -201,13 +201,13 @@ namespace VulkanEngine {
             createInfo.enabledLayerCount = 0;
         }
 
-        if (vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device_) != VK_SUCCESS) 
+        if (vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device) != VK_SUCCESS) 
         {
             throw std::runtime_error("failed to create logical device!");
         }
 
-        vkGetDeviceQueue(m_Device_, indices.GraphicsFamily, 0, &m_GraphicsQueue_);
-        vkGetDeviceQueue(m_Device_, indices.PresentFamily, 0, &m_PresentQueue_);
+        vkGetDeviceQueue(m_Device, indices.GraphicsFamily, 0, &m_GraphicsQueue);
+        vkGetDeviceQueue(m_Device, indices.PresentFamily, 0, &m_PresentQueue);
     }
 
     void VEDevice::CreateCommandPool() 
@@ -220,7 +220,7 @@ namespace VulkanEngine {
         poolInfo.queueFamilyIndex                               = queueFamilyIndices.GraphicsFamily;
         poolInfo.flags                                          = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-        if (vkCreateCommandPool(m_Device_, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS) 
+        if (vkCreateCommandPool(m_Device, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS) 
         {
             throw std::runtime_error("failed to create command pool!");
         }
@@ -228,7 +228,7 @@ namespace VulkanEngine {
 
     void VEDevice::CreateSurface() 
     {
-        m_Window.CreateWindowSurface(m_Instance, &m_Surface_);
+        m_Window.CreateWindowSurface(m_Instance, &m_Surface);
     }
 
     bool VEDevice::IsDeviceSuitable(VkPhysicalDevice device)
@@ -390,7 +390,7 @@ namespace VulkanEngine {
             }
 
             VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_Surface_, &presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_Surface, &presentSupport);
 
             if (queueFamily.queueCount > 0 && presentSupport) 
             {
@@ -412,26 +412,26 @@ namespace VulkanEngine {
     SwapChainSupportDetails VEDevice::QuerySwapChainSupport(VkPhysicalDevice device) 
     {
         SwapChainSupportDetails details;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_Surface_, &details.Capabilities);
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_Surface, &details.Capabilities);
 
         uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface_, &formatCount, nullptr);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, nullptr);
 
         if (formatCount != 0)
         {
             details.Formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface_, &formatCount, details.Formats.data());
+            vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, details.Formats.data());
         }
 
         uint32_t presentModeCount;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface_, &presentModeCount, nullptr);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, nullptr);
 
         if (presentModeCount != 0) 
         {
             details.PresentModes.resize(presentModeCount);
             vkGetPhysicalDeviceSurfacePresentModesKHR(
                 device,
-                m_Surface_,
+                m_Surface,
                 &presentModeCount,
                 details.PresentModes.data());
         }
@@ -484,13 +484,13 @@ namespace VulkanEngine {
         bufferInfo.usage                                        = usage;
         bufferInfo.sharingMode                                  = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (vkCreateBuffer(m_Device_, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) 
+        if (vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) 
         {
             throw std::runtime_error("failed to create vertex buffer!");
         }
 
         VkMemoryRequirements memRequirements;
-        vkGetBufferMemoryRequirements(m_Device_, buffer, &memRequirements);
+        vkGetBufferMemoryRequirements(m_Device, buffer, &memRequirements);
 
         VkMemoryAllocateInfo allocInfo = {};
 
@@ -498,12 +498,12 @@ namespace VulkanEngine {
         allocInfo.allocationSize                                = memRequirements.size;
         allocInfo.memoryTypeIndex                               = FindMemoryType(memRequirements.memoryTypeBits, properties);
 
-        if (vkAllocateMemory(m_Device_, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+        if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to allocate vertex buffer memory!");
         }
 
-        vkBindBufferMemory(m_Device_, buffer, bufferMemory, 0);
+        vkBindBufferMemory(m_Device, buffer, bufferMemory, 0);
     }
 
     VkCommandBuffer VEDevice::BeginSingleTimeCommands()
@@ -516,7 +516,7 @@ namespace VulkanEngine {
         allocInfo.commandBufferCount                            = 1;
 
         VkCommandBuffer commandBuffer;
-        vkAllocateCommandBuffers(m_Device_, &allocInfo, &commandBuffer);
+        vkAllocateCommandBuffers(m_Device, &allocInfo, &commandBuffer);
 
         VkCommandBufferBeginInfo beginInfo = {};
 
@@ -537,10 +537,10 @@ namespace VulkanEngine {
         submitInfo.commandBufferCount                           = 1;
         submitInfo.pCommandBuffers                              = &commandBuffer;
 
-        vkQueueSubmit(m_GraphicsQueue_, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(m_GraphicsQueue_);
+        vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(m_GraphicsQueue);
 
-        vkFreeCommandBuffers(m_Device_, m_CommandPool, 1, &commandBuffer);
+        vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &commandBuffer);
     }
 
     void VEDevice::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
@@ -588,13 +588,13 @@ namespace VulkanEngine {
 
     void VEDevice::CreateImageWithInfo(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) 
     {
-        if (vkCreateImage(m_Device_, &imageInfo, nullptr, &image) != VK_SUCCESS) 
+        if (vkCreateImage(m_Device, &imageInfo, nullptr, &image) != VK_SUCCESS) 
         {
             throw std::runtime_error("failed to create image!");
         }
 
         VkMemoryRequirements memRequirements;
-        vkGetImageMemoryRequirements(m_Device_, image, &memRequirements);
+        vkGetImageMemoryRequirements(m_Device, image, &memRequirements);
 
         VkMemoryAllocateInfo allocInfo = {};
 
@@ -602,12 +602,12 @@ namespace VulkanEngine {
         allocInfo.allocationSize                                = memRequirements.size;
         allocInfo.memoryTypeIndex                               = FindMemoryType(memRequirements.memoryTypeBits, properties);
 
-        if (vkAllocateMemory(m_Device_, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
+        if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to allocate image memory!");
         }
 
-        if (vkBindImageMemory(m_Device_, image, imageMemory, 0) != VK_SUCCESS)
+        if (vkBindImageMemory(m_Device, image, imageMemory, 0) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to bind image memory!");
         }

@@ -41,10 +41,10 @@ namespace VulkanEngine {
         VEDevice& operator=(VEDevice&&) = delete;
 
         VkCommandPool GetCommandPool() { return m_CommandPool; }
-        VkDevice Device() { return m_Device_; }
-        VkSurfaceKHR Surface() { return m_Surface_; }
-        VkQueue GraphicsQueue() { return m_GraphicsQueue_; }
-        VkQueue PresentQueue() { return m_PresentQueue_; }
+        VkDevice Device() { return m_Device; }
+        VkSurfaceKHR Surface() { return m_Surface; }
+        VkQueue GraphicsQueue() { return m_GraphicsQueue; }
+        VkQueue PresentQueue() { return m_PresentQueue; }
 
         SwapChainSupportDetails GetSwapChainSupport() { return QuerySwapChainSupport(m_PhysicalDevice); }
         uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
@@ -97,10 +97,10 @@ namespace VulkanEngine {
         VEWindow& m_Window;
         VkCommandPool m_CommandPool;
 
-        VkDevice m_Device_;
-        VkSurfaceKHR m_Surface_;
-        VkQueue m_GraphicsQueue_;
-        VkQueue m_PresentQueue_;
+        VkDevice m_Device;
+        VkSurfaceKHR m_Surface;
+        VkQueue m_GraphicsQueue;
+        VkQueue m_PresentQueue;
 
         const std::vector<const char*> m_ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
         const std::vector<const char*> m_DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };

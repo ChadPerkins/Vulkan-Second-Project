@@ -142,6 +142,7 @@
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\VE_Device.cpp" />
+    <ClCompile Include="src\VE_Model.cpp" />
     <ClCompile Include="src\VE_Pipeline.cpp" />
     <ClCompile Include="src\VE_SwapChain.cpp" />
     <ClCompile Include="src\VE_Window.cpp" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\VE_Device.h" />
+    <ClInclude Include="src\VE_Model.h" />
     <ClInclude Include="src\VE_Pipeline.h" />
     <ClInclude Include="src\VE_SwapChain.h" />
     <ClInclude Include="src\VE_Window.h" />
@@ -163,4 +165,3 @@
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
-

@@ -6,6 +6,7 @@
 namespace VulkanEngine {
 	Application::Application()
 	{
+		LoadModels();
 		CreatePipelineLayout();
 		CreatePipeline();
 		CreateCommandBuffers();
@@ -26,6 +27,15 @@ namespace VulkanEngine {
 
 		// Block the CPU until all GPU operations are completed
 		vkDeviceWaitIdle(device.Device());
+	}
+
+	void Application::LoadModels()
+	{
+		std::vector<VEModel::Vertex> vertices = {};
+
+		Sierpinski(vertices, 5, { -0.5f, 0.5f }, { 0.5f, 0.5f }, { 0.0f, -0.5f });
+
+		model = std::make_unique<VEModel>(device, vertices);
 	}
 
 	void Application::CreatePipelineLayout()
@@ -103,8 +113,10 @@ namespace VulkanEngine {
 			vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 			pipeline->Bind(commandBuffers[i]);
-			vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
 
+			model->Bind(commandBuffers[i]);
+			model->Draw(commandBuffers[i]);
+			
 			vkCmdEndRenderPass(commandBuffers[i]);
 
 			if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
@@ -129,6 +141,27 @@ namespace VulkanEngine {
 		if (result != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to aquire the next swap chain image");
+		}
+	}
+
+	void Application::Sierpinski(
+		std::vector<VEModel::Vertex>& vertices,
+		int depth,
+		glm::vec2 left,
+		glm::vec2 right,
+		glm::vec2 top) {
+		if (depth <= 0) {
+			vertices.push_back({ top });
+			vertices.push_back({ right });
+			vertices.push_back({ left });
+		}
+		else {
+			auto leftTop = 0.5f * (left + top);
+			auto rightTop = 0.5f * (right + top);
+			auto leftRight = 0.5f * (left + right);
+			Sierpinski(vertices, depth - 1, left, leftRight, leftTop);
+			Sierpinski(vertices, depth - 1, leftRight, right, rightTop);
+			Sierpinski(vertices, depth - 1, leftTop, rightTop, top);
 		}
 	}
 }

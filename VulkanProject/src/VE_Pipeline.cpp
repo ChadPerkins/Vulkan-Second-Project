@@ -1,4 +1,5 @@
 #include "VE_Pipeline.h"
+#include"VE_Model.h"
 
 #include <cassert>
 #include <fstream>
@@ -76,13 +77,16 @@ namespace VulkanEngine {
 		shaderStages[1].pNext									= nullptr;
 		shaderStages[1].pSpecializationInfo						= nullptr;
 
+		auto bindingDescriptions = VEModel::Vertex::GetBindingDescriptions();
+		auto attributeDescriptions = VEModel::Vertex::GetAttributeDescriptions();
+
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 
 		vertexInputInfo.sType									= VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexAttributeDescriptionCount			= 0;
-		vertexInputInfo.vertexBindingDescriptionCount			= 0;
-		vertexInputInfo.pVertexAttributeDescriptions			= nullptr;
-		vertexInputInfo.pVertexBindingDescriptions				= nullptr;
+		vertexInputInfo.vertexAttributeDescriptionCount			= static_cast<uint32_t>(bindingDescriptions.size());
+		vertexInputInfo.vertexBindingDescriptionCount			= static_cast<uint32_t>(attributeDescriptions.size());;
+		vertexInputInfo.pVertexAttributeDescriptions			= attributeDescriptions.data();
+		vertexInputInfo.pVertexBindingDescriptions				= bindingDescriptions.data();
 
 		VkPipelineViewportStateCreateInfo viewportInfo = {};
 
