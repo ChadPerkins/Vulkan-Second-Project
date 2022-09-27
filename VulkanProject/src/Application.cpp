@@ -1,6 +1,7 @@
 #include "Application.h"
 
 #include <array>
+#include <iostream>
 #include <stdexcept>
 
 namespace VulkanEngine {
@@ -33,8 +34,8 @@ namespace VulkanEngine {
 	{
 		std::vector<VEModel::Vertex> vertices = {};
 
-		Sierpinski(vertices, 5, { -0.5f, 0.5f }, { 0.5f, 0.5f }, { 0.0f, -0.5f });
-
+		Sierpinski(vertices, 5, { 0.0f, -0.5f }, { 0.5f,  0.5f }, { -0.5f,  0.5f });
+		
 		model = std::make_unique<VEModel>(device, vertices);
 	}
 
@@ -144,24 +145,29 @@ namespace VulkanEngine {
 		}
 	}
 
-	void Application::Sierpinski(
-		std::vector<VEModel::Vertex>& vertices,
+	void Application::Sierpinski(std::vector<VEModel::Vertex>& vertices,
 		int depth,
-		glm::vec2 left,
+		glm::vec2 top,
 		glm::vec2 right,
-		glm::vec2 top) {
-		if (depth <= 0) {
-			vertices.push_back({ top });
-			vertices.push_back({ right });
-			vertices.push_back({ left });
+		glm::vec2 left)
+	{
+		if (depth <= 0)
+		{
+			vertices.push_back({ top,   { 1.0f, 0.0f, 0.0f } });
+			vertices.push_back({ right, { 0.0f, 1.0f, 0.0f } });
+			vertices.push_back({ left,  { 0.0f, 0.0f, 1.0f } });
+		
 		}
-		else {
+		else
+		{
 			auto leftTop = 0.5f * (left + top);
 			auto rightTop = 0.5f * (right + top);
 			auto leftRight = 0.5f * (left + right);
-			Sierpinski(vertices, depth - 1, left, leftRight, leftTop);
-			Sierpinski(vertices, depth - 1, leftRight, right, rightTop);
-			Sierpinski(vertices, depth - 1, leftTop, rightTop, top);
+			Sierpinski(vertices, depth - 1, leftTop, leftRight, left);
+			Sierpinski(vertices, depth - 1, rightTop, right, leftRight);
+			Sierpinski(vertices, depth - 1, top, rightTop, leftTop);
+			
 		}
 	}
+
 }

@@ -36,9 +36,9 @@ namespace VulkanEngine {
 		// Recursive triangle effect
 		void Sierpinski(std::vector<VEModel::Vertex>& vertices,
 			int depth,
-			glm::vec2 left,
+			glm::vec2 top,
 			glm::vec2 right,
-			glm::vec2 top);
+			glm::vec2 left);
 
 	private:
 		VEWindow window{ WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE };
