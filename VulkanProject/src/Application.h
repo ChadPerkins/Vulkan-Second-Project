@@ -31,7 +31,11 @@ namespace VulkanEngine {
 		void CreatePipelineLayout();
 		void CreatePipeline();
 		void CreateCommandBuffers();
+		void FreeCommandBuffers();
 		void DrawFrame();
+
+		void RecreateSwapChain();
+		void RecordCommandBuffer(uint32_t imageIndex);
 
 		// Recursive triangle effect
 		void Sierpinski(std::vector<VEModel::Vertex>& vertices,
@@ -43,7 +47,7 @@ namespace VulkanEngine {
 	private:
 		VEWindow window{ WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE };
 		VEDevice device{ window };
-		VESwapChain swapchain{ device, window.GetExtent() };
+		std::unique_ptr<VESwapChain> swapchain;
 		std::unique_ptr<VEPipeline> pipeline;
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffers;

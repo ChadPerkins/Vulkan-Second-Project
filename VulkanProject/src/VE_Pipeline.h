@@ -8,14 +8,18 @@ namespace VulkanEngine {
 
 	struct PipelineConfigInfo
 	{
-		VkViewport Viewport;
-		VkRect2D Scissor;
+		PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+
+		VkPipelineViewportStateCreateInfo ViewportInfo;
 		VkPipelineInputAssemblyStateCreateInfo InputAssemblyInfo;
 		VkPipelineRasterizationStateCreateInfo RasterizationInfo;
 		VkPipelineMultisampleStateCreateInfo MultisampleInfo;
 		VkPipelineColorBlendAttachmentState ColorBlendAttachment;
 		VkPipelineColorBlendStateCreateInfo ColorBlendInfo;
 		VkPipelineDepthStencilStateCreateInfo DepthStencilInfo;
+		std::vector<VkDynamicState> DynamicStateEnables;
+		VkPipelineDynamicStateCreateInfo DynamicStateInfo;
 		VkPipelineLayout PipelineLayout		= nullptr;
 		VkRenderPass RenderPass				= nullptr;
 		uint32_t Subpass					= 0;
@@ -27,22 +31,22 @@ namespace VulkanEngine {
 		VEPipeline(VEDevice& device,
 			const std::string& vertShaderPath,
 			const std::string& fragShaderPath,
-			const PipelineConfigInfo configInfo);
+			const PipelineConfigInfo& configInfo);
 		~VEPipeline();
 
 		VEPipeline(const VEPipeline&) = delete;
-		void operator=(const VEPipeline&) = delete;
+		VEPipeline& operator=(const VEPipeline&) = delete;
 
 		void Bind(VkCommandBuffer commandBuffer);
 
-		static PipelineConfigInfo DefaultPipelineConfigInfo(uint32_t width, uint32_t height);
+		static void DefaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
 
 	private:
 		static std::vector<char> ReadFile(const std::string& filepath);
 
 		void CreateGraphicsPipeline(const std::string& vertShaderPath,
 			const std::string& fragShaderPath,
-			const PipelineConfigInfo configInfo);
+			const PipelineConfigInfo& configInfo);
 
 		void CreateShaderModule(const std::vector<char>& shader, VkShaderModule* shaderModule);
 

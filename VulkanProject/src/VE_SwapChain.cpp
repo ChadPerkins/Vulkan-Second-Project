@@ -13,6 +13,20 @@ namespace VulkanEngine {
     VESwapChain::VESwapChain(VEDevice& deviceRef, VkExtent2D extent)
         : m_Device{ deviceRef }, m_WindowExtent{ extent }
     {
+        Init();
+    }
+
+    VESwapChain::VESwapChain(VEDevice& deviceRef, VkExtent2D extent, std::shared_ptr<VESwapChain> previous)
+        : m_Device{ deviceRef }, m_WindowExtent{ extent }, m_OldSwapChain{ previous }
+    {
+        Init();
+
+        // Clean up old swapchain since it's no longer needed
+        m_OldSwapChain = nullptr;
+    }
+
+    void VESwapChain::Init()
+    {
         CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
@@ -178,7 +192,7 @@ namespace VulkanEngine {
         createInfo.presentMode                                  = presentMode;
         createInfo.clipped                                      = VK_TRUE;
 
-        createInfo.oldSwapchain                                 = VK_NULL_HANDLE;
+        createInfo.oldSwapchain                                 = m_OldSwapChain == nullptr ? VK_NULL_HANDLE : m_OldSwapChain->m_SwapChain;
 
         if (vkCreateSwapchainKHR(m_Device.Device(), &createInfo, nullptr, &m_SwapChain) != VK_SUCCESS)
         {

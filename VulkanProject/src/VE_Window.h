@@ -17,16 +17,21 @@ namespace VulkanEngine {
 
 		bool Close() { return glfwWindowShouldClose(m_Window); }
 		VkExtent2D GetExtent() { return { m_Width, m_Height }; }
+		bool WasWindowResized() { return m_FramebufferResized; }
+		void ResetWindowResizeFlag() { m_FramebufferResized = false; }
 
 		void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
 	private:
+		static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
 		void InitWindow();
 
 	private:
+		uint32_t m_Width;
+		uint32_t m_Height;
+		bool m_FramebufferResized = false;
 		GLFWwindow* m_Window;
 		std::string m_Title;
-		const uint32_t m_Width;
-		const uint32_t m_Height;
 
 	};
 }
