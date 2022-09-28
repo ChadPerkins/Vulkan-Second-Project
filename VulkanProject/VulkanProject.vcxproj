@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\VE_Device.h" />
+    <ClInclude Include="src\VE_GameObject.h" />
     <ClInclude Include="src\VE_Model.h" />
     <ClInclude Include="src\VE_Pipeline.h" />
     <ClInclude Include="src\VE_SwapChain.h" />

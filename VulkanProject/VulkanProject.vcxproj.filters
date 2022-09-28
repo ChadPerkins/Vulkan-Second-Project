@@ -56,6 +56,9 @@
     <ClInclude Include="src\VE_Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\VE_GameObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Simple_Shader.vert.spv" />

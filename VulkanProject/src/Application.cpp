@@ -3,6 +3,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <array>
 #include <cassert>
@@ -13,13 +14,14 @@ namespace VulkanEngine {
 
 	struct SimplePushConstantData
 	{
-		glm::vec2 offset;
-		alignas(16) glm::vec3 color;
+		glm::mat2 Transform{ 1.0f };
+		glm::vec2 Offset;
+		alignas(16) glm::vec3 Color;
 	};
 
 	Application::Application()
 	{
-		LoadModels();
+		LoadGameObjects();
 		CreatePipelineLayout();
 		RecreateSwapChain();
 		CreateCommandBuffers();
@@ -42,13 +44,23 @@ namespace VulkanEngine {
 		vkDeviceWaitIdle(device.Device());
 	}
 
-	void Application::LoadModels()
+	void Application::LoadGameObjects()
 	{
 		std::vector<VEModel::Vertex> vertices = {};
 
 		Sierpinski(vertices, 4, { 0.0f, -0.5f }, { 0.5f,  0.5f }, { -0.5f,  0.5f });
 		
-		model = std::make_unique<VEModel>(device, vertices);
+		auto model = std::make_shared<VEModel>(device, vertices);
+
+		auto triangle = VEGameObject::CreateGameObject();
+
+		triangle.m_Model							= model;
+		triangle.m_Color							= { 0.1f, 0.8f, 0.1f };
+		triangle.m_Transform2D.Translation.x		= 0.2f;
+		triangle.m_Transform2D.Scale				= { 2.0f, 0.5f };
+		triangle.m_Transform2D.Rotation				= 0.25f * glm::two_pi<float>();
+
+		gameObjects.push_back(std::move(triangle));
 	}
 
 	void Application::CreatePipelineLayout()
@@ -150,9 +162,6 @@ namespace VulkanEngine {
 
 	void Application::RecordCommandBuffer(uint32_t imageIndex)
 	{
-		static int frame = 0;
-		frame = (frame + 1) % 500;
-
 		VkCommandBufferBeginInfo beginInfo = {};
 
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -181,7 +190,6 @@ namespace VulkanEngine {
 
 		vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-
 		VkViewport viewport = {};
 
 		viewport.x								= 0.0f;
@@ -196,26 +204,7 @@ namespace VulkanEngine {
 		vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
 		vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
-		pipeline->Bind(commandBuffers[imageIndex]);
-
-		model->Bind(commandBuffers[imageIndex]);
-
-		for (int i = 0; i < 4; i++)
-		{
-			SimplePushConstantData push = {};
-
-			push.offset	= { -0.5f + frame * 0.004f, -0.4f + i * 0.25f };
-			push.color	= { 0.2f + 0.2f * i, 0.0f, 0.4f + 0.4f * i };
-
-			vkCmdPushConstants(commandBuffers[imageIndex],
-				pipelineLayout,
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-				0,
-				sizeof(SimplePushConstantData),
-				&push);
-
-			model->Draw(commandBuffers[imageIndex]);
-		}
+		RenderGameObjects(commandBuffers[imageIndex]);
 
 		vkCmdEndRenderPass(commandBuffers[imageIndex]);
 
@@ -225,6 +214,32 @@ namespace VulkanEngine {
 		}
 	}
 	 
+	void Application::RenderGameObjects(VkCommandBuffer commandBuffer)
+	{
+		pipeline->Bind(commandBuffer);
+
+		for (auto& obj : gameObjects)
+		{
+			obj.m_Transform2D.Rotation			= glm::mod(obj.m_Transform2D.Rotation + 0.01f, glm::two_pi<float>());
+
+			SimplePushConstantData push = {};
+
+			push.Offset							= obj.m_Transform2D.Translation;
+			push.Color							= obj.m_Color;
+			push.Transform						= obj.m_Transform2D.Mat2();
+
+			vkCmdPushConstants(commandBuffer,
+				pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(SimplePushConstantData),
+				&push);
+
+			obj.m_Model->Bind(commandBuffer);
+			obj.m_Model->Draw(commandBuffer);
+		}
+	}
+
 	void Application::DrawFrame()
 	{
 		uint32_t imageIndex;
