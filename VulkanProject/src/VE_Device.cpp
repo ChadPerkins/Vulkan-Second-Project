@@ -235,18 +235,18 @@ namespace VulkanEngine {
     {
         QueueFamilyIndices indices                              = FindQueueFamilies(device);
         bool extensionsSupported                                = CheckDeviceExtensionSupport(device);
-        bool swapChainAdequate                                  = false;
+        bool SwapChainAdequate                                  = false;
 
         if (extensionsSupported) 
         {
-            SwapChainSupportDetails swapChainSupport            = QuerySwapChainSupport(device);
-            swapChainAdequate                                   = !swapChainSupport.Formats.empty() && !swapChainSupport.PresentModes.empty();
+            SwapChainSupportDetails SwapChainSupport            = QuerySwapChainSupport(device);
+            SwapChainAdequate                                   = !SwapChainSupport.Formats.empty() && !SwapChainSupport.PresentModes.empty();
         }
 
         VkPhysicalDeviceFeatures supportedFeatures;
         vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
-        return indices.IsComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+        return indices.IsComplete() && extensionsSupported && SwapChainAdequate && supportedFeatures.samplerAnisotropy;
     }
 
     void VEDevice::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) 

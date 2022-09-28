@@ -39,6 +39,12 @@ namespace VulkanEngine {
         VkResult AcquireNextImage(uint32_t* imageIndex);
         VkResult SubmitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
+        bool CompareSwapFormats(const VESwapChain& swapChain) const
+        {
+            return swapChain.m_SwapChainDepthFormat == m_SwapChainDepthFormat &&
+                   swapChain.m_SwapChainImageFormat == m_SwapChainImageFormat;
+        }
+
     private:
         void Init();
         void CreateSwapChain();
@@ -49,14 +55,13 @@ namespace VulkanEngine {
         void CreateSyncObjects();
 
         // Helper functions
-        VkSurfaceFormatKHR ChooseSwapSurfaceFormat(
-            const std::vector<VkSurfaceFormatKHR>& availableFormats);
-        VkPresentModeKHR ChooseSwapPresentMode(
-            const std::vector<VkPresentModeKHR>& availablePresentModes);
+        VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+        VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
         VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
     private:
         VkFormat m_SwapChainImageFormat;
+        VkFormat m_SwapChainDepthFormat;
         VkExtent2D m_SwapChainExtent;
 
         std::vector<VkFramebuffer> m_SwapChainFramebuffers;

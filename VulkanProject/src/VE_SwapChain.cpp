@@ -21,7 +21,7 @@ namespace VulkanEngine {
     {
         Init();
 
-        // Clean up old swapchain since it's no longer needed
+        // Clean up old SwapChain since it's no longer needed
         m_OldSwapChain = nullptr;
     }
 
@@ -145,17 +145,17 @@ namespace VulkanEngine {
 
     void VESwapChain::CreateSwapChain()
     {
-        SwapChainSupportDetails swapChainSupport                = m_Device.GetSwapChainSupport();
+        SwapChainSupportDetails SwapChainSupport                = m_Device.GetSwapChainSupport();
 
-        VkSurfaceFormatKHR surfaceFormat                        = ChooseSwapSurfaceFormat(swapChainSupport.Formats);
-        VkPresentModeKHR presentMode                            = ChooseSwapPresentMode(swapChainSupport.PresentModes);
-        VkExtent2D extent                                       = ChooseSwapExtent(swapChainSupport.Capabilities);
+        VkSurfaceFormatKHR surfaceFormat                        = ChooseSwapSurfaceFormat(SwapChainSupport.Formats);
+        VkPresentModeKHR presentMode                            = ChooseSwapPresentMode(SwapChainSupport.PresentModes);
+        VkExtent2D extent                                       = ChooseSwapExtent(SwapChainSupport.Capabilities);
 
-        uint32_t imageCount                                     = swapChainSupport.Capabilities.minImageCount + 1;
+        uint32_t imageCount                                     = SwapChainSupport.Capabilities.minImageCount + 1;
 
-        if (swapChainSupport.Capabilities.maxImageCount > 0 && imageCount > swapChainSupport.Capabilities.maxImageCount)
+        if (SwapChainSupport.Capabilities.maxImageCount > 0 && imageCount > SwapChainSupport.Capabilities.maxImageCount)
         {
-            imageCount = swapChainSupport.Capabilities.maxImageCount;
+            imageCount = SwapChainSupport.Capabilities.maxImageCount;
         }
 
         VkSwapchainCreateInfoKHR createInfo = {};
@@ -186,7 +186,7 @@ namespace VulkanEngine {
             createInfo.pQueueFamilyIndices                      = nullptr;  // Optional
         }
 
-        createInfo.preTransform                                 = swapChainSupport.Capabilities.currentTransform;
+        createInfo.preTransform                                 = SwapChainSupport.Capabilities.currentTransform;
         createInfo.compositeAlpha                               = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
         createInfo.presentMode                                  = presentMode;
@@ -280,15 +280,15 @@ namespace VulkanEngine {
 
         VkSubpassDependency dependency = {};
 
+        dependency.dstSubpass                                   = 0;
+        dependency.dstAccessMask                                = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                                                                  VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        dependency.dstStageMask                                 = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                                                                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         dependency.srcSubpass                                   = VK_SUBPASS_EXTERNAL;
         dependency.srcAccessMask                                = 0;
         dependency.srcStageMask                                 = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | 
                                                                   VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.dstSubpass                                   = 0;
-        dependency.dstStageMask                                 = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                                                                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.dstAccessMask                                = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                                                                  VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
         std::array<VkAttachmentDescription, 2> attachments      = { colorAttachment, depthAttachment };
 
@@ -316,15 +316,15 @@ namespace VulkanEngine {
         {
             std::array<VkImageView, 2> attachments              = { m_SwapChainImageViews[i], m_DepthImageViews[i] };
 
-            VkExtent2D swapChainExtent                          = GetSwapChainExtent();
+            VkExtent2D SwapChainExtent                          = GetSwapChainExtent();
             VkFramebufferCreateInfo framebufferInfo = {};
 
             framebufferInfo.sType                               = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferInfo.renderPass                          = m_RenderPass;
             framebufferInfo.attachmentCount                     = static_cast<uint32_t>(attachments.size());
             framebufferInfo.pAttachments                        = attachments.data();
-            framebufferInfo.width                               = swapChainExtent.width;
-            framebufferInfo.height                              = swapChainExtent.height;
+            framebufferInfo.width                               = SwapChainExtent.width;
+            framebufferInfo.height                              = SwapChainExtent.height;
             framebufferInfo.layers                              = 1;
 
             if (vkCreateFramebuffer(
@@ -341,7 +341,8 @@ namespace VulkanEngine {
     void VESwapChain::CreateDepthResources()
     {
         VkFormat depthFormat                                    = FindDepthFormat();
-        VkExtent2D swapChainExtent                              = GetSwapChainExtent();
+        m_SwapChainDepthFormat                                  = depthFormat;
+        VkExtent2D SwapChainExtent                              = GetSwapChainExtent();
 
         m_DepthImages.resize(ImageCount());
         m_DepthImageMemorys.resize(ImageCount());
@@ -351,19 +352,19 @@ namespace VulkanEngine {
         {
             VkImageCreateInfo imageInfo = {};
 
-            imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-            imageInfo.imageType = VK_IMAGE_TYPE_2D;
-            imageInfo.extent.width = swapChainExtent.width;
-            imageInfo.extent.height = swapChainExtent.height;
-            imageInfo.extent.depth = 1;
-            imageInfo.mipLevels = 1;
-            imageInfo.arrayLayers = 1;
-            imageInfo.format = depthFormat;
-            imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-            imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-            imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-            imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            imageInfo.sType                                     = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+            imageInfo.imageType                                 = VK_IMAGE_TYPE_2D;
+            imageInfo.extent.width                              = SwapChainExtent.width;
+            imageInfo.extent.height                             = SwapChainExtent.height;
+            imageInfo.extent.depth                              = 1;
+            imageInfo.mipLevels                                 = 1;
+            imageInfo.arrayLayers                               = 1;
+            imageInfo.format                                    = depthFormat;
+            imageInfo.tiling                                    = VK_IMAGE_TILING_OPTIMAL;
+            imageInfo.initialLayout                             = VK_IMAGE_LAYOUT_UNDEFINED;
+            imageInfo.usage                                     = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+            imageInfo.samples                                   = VK_SAMPLE_COUNT_1_BIT;
+            imageInfo.sharingMode                               = VK_SHARING_MODE_EXCLUSIVE;
             imageInfo.flags = 0;
 
             m_Device.CreateImageWithInfo(
@@ -398,9 +399,11 @@ namespace VulkanEngine {
         m_ImagesInFlight.resize(ImageCount(), VK_NULL_HANDLE);
 
         VkSemaphoreCreateInfo semaphoreInfo = {};
+
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
         VkFenceCreateInfo fenceInfo = {};
+
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 

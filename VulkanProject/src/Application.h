@@ -1,9 +1,8 @@
 #pragma once
 #include "VE_Device.h"
 #include "VE_GameObject.h"
-#include "VE_Pipeline.h"
-#include "VE_SwapChain.h"
 #include "VE_Window.h"
+#include "VE_Renderer.h"
 
 #include <memory>
 #include <vector>
@@ -28,19 +27,10 @@ namespace VulkanEngine {
 
 	private:
 		void LoadGameObjects();
-		void CreatePipelineLayout();
-		void CreatePipeline();
-		void CreateCommandBuffers();
-		void FreeCommandBuffers();
-		void DrawFrame();
-
-		void RecreateSwapChain();
-		void RecordCommandBuffer(uint32_t imageIndex);
-		void RenderGameObjects(VkCommandBuffer commandBuffer);
 
 		// Recursive triangle effect
 		void Sierpinski(std::vector<VEModel::Vertex>& vertices,
-			int depth,
+			uint32_t depth,
 			glm::vec2 top,
 			glm::vec2 right,
 			glm::vec2 left);
@@ -48,10 +38,7 @@ namespace VulkanEngine {
 	private:
 		VEWindow window{ WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE };
 		VEDevice device{ window };
-		std::unique_ptr<VESwapChain> swapchain;
-		std::unique_ptr<VEPipeline> pipeline;
-		VkPipelineLayout pipelineLayout;
-		std::vector<VkCommandBuffer> commandBuffers;
+		VERenderer renderer{ window, device };
 		std::vector<VEGameObject> gameObjects;;
 	};
 }
