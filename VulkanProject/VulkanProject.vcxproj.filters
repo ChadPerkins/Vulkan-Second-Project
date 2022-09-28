@@ -58,9 +58,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Simple_Shader.vert" />
-    <None Include="Shaders\Simple_Shader.frag" />
     <None Include="Shaders\Simple_Shader.vert.spv" />
     <None Include="Shaders\Simple_Shader.frag.spv" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Shaders\Simple_Shader.frag" />
+    <CustomBuild Include="Shaders\Simple_Shader.vert" />
   </ItemGroup>
 </Project>

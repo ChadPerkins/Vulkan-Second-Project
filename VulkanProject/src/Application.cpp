@@ -1,11 +1,22 @@
 #include "Application.h"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
 #include <array>
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
 
 namespace VulkanEngine {
+
+	struct SimplePushConstantData
+	{
+		glm::vec2 offset;
+		alignas(16) glm::vec3 color;
+	};
+
 	Application::Application()
 	{
 		LoadModels();
@@ -35,20 +46,26 @@ namespace VulkanEngine {
 	{
 		std::vector<VEModel::Vertex> vertices = {};
 
-		Sierpinski(vertices, 5, { 0.0f, -0.5f }, { 0.5f,  0.5f }, { -0.5f,  0.5f });
+		Sierpinski(vertices, 4, { 0.0f, -0.5f }, { 0.5f,  0.5f }, { -0.5f,  0.5f });
 		
 		model = std::make_unique<VEModel>(device, vertices);
 	}
 
 	void Application::CreatePipelineLayout()
 	{
+		VkPushConstantRange pushConstantRange = {};
+
+		pushConstantRange.stageFlags				= VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		pushConstantRange.offset					= 0;
+		pushConstantRange.size						= sizeof(SimplePushConstantData);
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 
-		pipelineLayoutInfo.sType								= VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount						= 0;
-		pipelineLayoutInfo.pSetLayouts							= nullptr;
-		pipelineLayoutInfo.pushConstantRangeCount				= 0;
-		pipelineLayoutInfo.pPushConstantRanges					= nullptr;
+		pipelineLayoutInfo.sType					= VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount			= 0;
+		pipelineLayoutInfo.pSetLayouts				= nullptr;
+		pipelineLayoutInfo.pushConstantRangeCount	= 1;
+		pipelineLayoutInfo.pPushConstantRanges		= &pushConstantRange;
 
 		if (vkCreatePipelineLayout(device.Device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
 		{
@@ -65,8 +82,8 @@ namespace VulkanEngine {
 
 		VEPipeline::DefaultPipelineConfigInfo(pipelineConfig);
 
-		pipelineConfig.RenderPass								= swapchain->GetRenderPass();
-		pipelineConfig.PipelineLayout							= pipelineLayout;
+		pipelineConfig.RenderPass					= swapchain->GetRenderPass();
+		pipelineConfig.PipelineLayout				= pipelineLayout;
 
 		pipeline = std::make_unique<VEPipeline>(device,
 			"shaders/simple_shader.vert.spv",
@@ -110,10 +127,10 @@ namespace VulkanEngine {
 
 		VkCommandBufferAllocateInfo allocInfo = {};
 
-		allocInfo.sType											= VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.level											= VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool									= device.GetCommandPool();
-		allocInfo.commandBufferCount							= static_cast<uint32_t>(commandBuffers.size());
+		allocInfo.sType							= VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.level							= VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandPool					= device.GetCommandPool();
+		allocInfo.commandBufferCount			= static_cast<uint32_t>(commandBuffers.size());
 
 		if (vkAllocateCommandBuffers(device.Device(), &allocInfo, commandBuffers.data()) != VK_SUCCESS)
 		{
@@ -133,6 +150,9 @@ namespace VulkanEngine {
 
 	void Application::RecordCommandBuffer(uint32_t imageIndex)
 	{
+		static int frame = 0;
+		frame = (frame + 1) % 500;
+
 		VkCommandBufferBeginInfo beginInfo = {};
 
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -145,38 +165,57 @@ namespace VulkanEngine {
 		VkRenderPassBeginInfo renderPassInfo = {};
 
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = swapchain->GetRenderPass();
-		renderPassInfo.framebuffer = swapchain->GetFrameBuffer(imageIndex);
+		renderPassInfo.renderPass				= swapchain->GetRenderPass();
+		renderPassInfo.framebuffer				= swapchain->GetFrameBuffer(imageIndex);
 
-		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = swapchain->GetSwapChainExtent();
+		renderPassInfo.renderArea.offset		= { 0, 0 };
+		renderPassInfo.renderArea.extent		= swapchain->GetSwapChainExtent();
 
 		std::array<VkClearValue, 2> clearValues = {};
 
-		clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
-		clearValues[1].depthStencil = { 1.0f, 0 };
+		clearValues[0].color					= { 0.01f, 0.01f, 0.01f, 1.0f };
+		clearValues[1].depthStencil				= { 1.0f, 0 };
 
-		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-		renderPassInfo.pClearValues = clearValues.data();
+		renderPassInfo.clearValueCount			= static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues				= clearValues.data();
 
 		vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 
-		VkViewport viewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(swapchain->GetSwapChainExtent().width);
-		viewport.height = static_cast<float>(swapchain->GetSwapChainExtent().height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
+		VkViewport viewport = {};
+
+		viewport.x								= 0.0f;
+		viewport.y								= 0.0f;
+		viewport.width							= static_cast<float>(swapchain->GetSwapChainExtent().width);
+		viewport.height							= static_cast<float>(swapchain->GetSwapChainExtent().height);
+		viewport.minDepth						= 0.0f;
+		viewport.maxDepth						= 1.0f;
+
 		VkRect2D scissor{ {0, 0}, swapchain->GetSwapChainExtent() };
+
 		vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
 		vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
 		pipeline->Bind(commandBuffers[imageIndex]);
 
 		model->Bind(commandBuffers[imageIndex]);
-		model->Draw(commandBuffers[imageIndex]);
+
+		for (int i = 0; i < 4; i++)
+		{
+			SimplePushConstantData push = {};
+
+			push.offset	= { -0.5f + frame * 0.004f, -0.4f + i * 0.25f };
+			push.color	= { 0.2f + 0.2f * i, 0.0f, 0.4f + 0.4f * i };
+
+			vkCmdPushConstants(commandBuffers[imageIndex],
+				pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(SimplePushConstantData),
+				&push);
+
+			model->Draw(commandBuffers[imageIndex]);
+		}
 
 		vkCmdEndRenderPass(commandBuffers[imageIndex]);
 
@@ -226,9 +265,9 @@ namespace VulkanEngine {
 	{
 		if (depth <= 0)
 		{
-			vertices.push_back({ top,   { 1.0f, 0.0f, 0.0f } });
-			vertices.push_back({ right, { 0.0f, 1.0f, 0.0f } });
-			vertices.push_back({ left,  { 0.0f, 0.0f, 1.0f } });
+			vertices.push_back({ top });
+			vertices.push_back({ right });
+			vertices.push_back({ left });
 		
 		}
 		else
