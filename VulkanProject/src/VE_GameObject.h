@@ -7,6 +7,7 @@
 
 namespace VulkanEngine {
 
+	// Transform a component from object space into the shared world space (model transformation matrix)
 	struct TransformComponent
 	{
 		glm::vec3 Translation{}; // Position offset

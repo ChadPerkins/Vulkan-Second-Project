@@ -74,6 +74,8 @@ namespace VulkanEngine {
 	{
 		m_Pipeline->Bind(commandBuffer);
 
+		auto projectionView = camera.GetProjection() * camera.GetView();
+
 		for (auto& obj : gameObjects)
 		{
 			obj.m_Transform.Rotation.y				= glm::mod(obj.m_Transform.Rotation.y + 0.01f, glm::two_pi<float>());
@@ -82,7 +84,7 @@ namespace VulkanEngine {
 			SimplePushConstantData push = {};
 
 			push.Color								 = obj.m_Color;
-			push.Transform							 = camera.GetProjection() * obj.m_Transform.Mat4();
+			push.Transform							 = projectionView * obj.m_Transform.Mat4();
 
 			vkCmdPushConstants(commandBuffer,
 				m_PipelineLayout,
