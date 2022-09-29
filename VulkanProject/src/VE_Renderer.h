@@ -51,7 +51,7 @@ namespace VulkanEngine {
 		std::unique_ptr<VESwapChain> m_SwapChain;
 		std::vector<VkCommandBuffer> m_CommandBuffers;
 		uint32_t m_CurrentImageIndex;
-		uint32_t m_CurrentFrameIndex;
-		bool m_IsFrameStarted;
+		uint32_t m_CurrentFrameIndex = 0;
+		bool m_IsFrameStarted = false;
 	};
 }

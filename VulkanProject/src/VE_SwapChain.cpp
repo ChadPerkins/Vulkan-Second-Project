@@ -97,24 +97,24 @@ namespace VulkanEngine {
             vkWaitForFences(m_Device.Device(), 1, &m_ImagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
         }
 
-        m_ImagesInFlight[*imageIndex]                           = m_InFlightFences[m_CurrentFrame];
+        m_ImagesInFlight[*imageIndex]                   = m_InFlightFences[m_CurrentFrame];
 
         VkSubmitInfo submitInfo = {};
 
-        submitInfo.sType                                        = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.sType                                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        VkSemaphore waitSemaphores[]                            = { m_ImageAvailableSemaphores[m_CurrentFrame] };
-        VkPipelineStageFlags waitStages[]                       = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-        submitInfo.waitSemaphoreCount                           = 1;
-        submitInfo.pWaitSemaphores                              = waitSemaphores;
-        submitInfo.pWaitDstStageMask                            = waitStages;
+        VkSemaphore waitSemaphores[]                    = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+        VkPipelineStageFlags waitStages[]               = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        submitInfo.waitSemaphoreCount                   = 1;
+        submitInfo.pWaitSemaphores                      = waitSemaphores;
+        submitInfo.pWaitDstStageMask                    = waitStages;
 
-        submitInfo.commandBufferCount                           = 1;
-        submitInfo.pCommandBuffers                              = buffers;
+        submitInfo.commandBufferCount                   = 1;
+        submitInfo.pCommandBuffers                      = buffers;
 
-        VkSemaphore signalSemaphores[]                          = { m_RenderFinishedSemaphores[m_CurrentFrame] };
-        submitInfo.signalSemaphoreCount                         = 1;
-        submitInfo.pSignalSemaphores                            = signalSemaphores;
+        VkSemaphore signalSemaphores[]                  = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+        submitInfo.signalSemaphoreCount                 = 1;
+        submitInfo.pSignalSemaphores                    = signalSemaphores;
 
         vkResetFences(m_Device.Device(), 1, &m_InFlightFences[m_CurrentFrame]);
 
@@ -125,33 +125,33 @@ namespace VulkanEngine {
 
         VkPresentInfoKHR presentInfo = {};
 
-        presentInfo.sType                                       = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        presentInfo.sType                               = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
-        presentInfo.waitSemaphoreCount                          = 1;
-        presentInfo.pWaitSemaphores                             = signalSemaphores;
+        presentInfo.waitSemaphoreCount                  = 1;
+        presentInfo.pWaitSemaphores                     = signalSemaphores;
 
-        VkSwapchainKHR swapChains[]                             = { m_SwapChain };
-        presentInfo.swapchainCount                              = 1;
-        presentInfo.pSwapchains                                 = swapChains;
+        VkSwapchainKHR swapChains[]                     = { m_SwapChain };
+        presentInfo.swapchainCount                      = 1;
+        presentInfo.pSwapchains                         = swapChains;
 
-        presentInfo.pImageIndices                               = imageIndex;
+        presentInfo.pImageIndices                       = imageIndex;
 
-        auto result                                      = vkQueuePresentKHR(m_Device.PresentQueue(), &presentInfo);
+        auto result = vkQueuePresentKHR(m_Device.PresentQueue(), &presentInfo);
 
-        m_CurrentFrame                                          = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+        m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
         return result;
     }
 
     void VESwapChain::CreateSwapChain()
     {
-        SwapChainSupportDetails SwapChainSupport                = m_Device.GetSwapChainSupport();
+        SwapChainSupportDetails SwapChainSupport        = m_Device.GetSwapChainSupport();
 
-        VkSurfaceFormatKHR surfaceFormat                        = ChooseSwapSurfaceFormat(SwapChainSupport.Formats);
-        VkPresentModeKHR presentMode                            = ChooseSwapPresentMode(SwapChainSupport.PresentModes);
-        VkExtent2D extent                                       = ChooseSwapExtent(SwapChainSupport.Capabilities);
+        VkSurfaceFormatKHR surfaceFormat                = ChooseSwapSurfaceFormat(SwapChainSupport.Formats);
+        VkPresentModeKHR presentMode                    = ChooseSwapPresentMode(SwapChainSupport.PresentModes);
+        VkExtent2D extent                               = ChooseSwapExtent(SwapChainSupport.Capabilities);
 
-        uint32_t imageCount                                     = SwapChainSupport.Capabilities.minImageCount + 1;
+        uint32_t imageCount                             = SwapChainSupport.Capabilities.minImageCount + 1;
 
         if (SwapChainSupport.Capabilities.maxImageCount > 0 && imageCount > SwapChainSupport.Capabilities.maxImageCount)
         {
@@ -160,39 +160,39 @@ namespace VulkanEngine {
 
         VkSwapchainCreateInfoKHR createInfo = {};
 
-        createInfo.sType                                        = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        createInfo.surface                                      = m_Device.Surface();
+        createInfo.sType                                = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        createInfo.surface                              = m_Device.Surface();
 
-        createInfo.minImageCount                                = imageCount;
-        createInfo.imageFormat                                  = surfaceFormat.format;
-        createInfo.imageColorSpace                              = surfaceFormat.colorSpace;
-        createInfo.imageExtent                                  = extent;
-        createInfo.imageArrayLayers                             = 1;
-        createInfo.imageUsage                                   = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        createInfo.minImageCount                        = imageCount;
+        createInfo.imageFormat                          = surfaceFormat.format;
+        createInfo.imageColorSpace                      = surfaceFormat.colorSpace;
+        createInfo.imageExtent                          = extent;
+        createInfo.imageArrayLayers                     = 1;
+        createInfo.imageUsage                           = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices                              = m_Device.FindPhysicalQueueFamilies();
-        uint32_t queueFamilyIndices[]                           = { indices.GraphicsFamily, indices.PresentFamily };
+        QueueFamilyIndices indices                      = m_Device.FindPhysicalQueueFamilies();
+        uint32_t queueFamilyIndices[]                   = { indices.GraphicsFamily, indices.PresentFamily };
 
         if (indices.GraphicsFamily != indices.PresentFamily)
         {
-            createInfo.imageSharingMode                         = VK_SHARING_MODE_CONCURRENT;
-            createInfo.queueFamilyIndexCount                    = 2;
-            createInfo.pQueueFamilyIndices                      = queueFamilyIndices;
+            createInfo.imageSharingMode                 = VK_SHARING_MODE_CONCURRENT;
+            createInfo.queueFamilyIndexCount            = 2;
+            createInfo.pQueueFamilyIndices              = queueFamilyIndices;
         }
         else
         {
-            createInfo.imageSharingMode                         = VK_SHARING_MODE_EXCLUSIVE;
-            createInfo.queueFamilyIndexCount                    = 0;      // Optional
-            createInfo.pQueueFamilyIndices                      = nullptr;  // Optional
+            createInfo.imageSharingMode                 = VK_SHARING_MODE_EXCLUSIVE;
+            createInfo.queueFamilyIndexCount            = 0;        // Optional
+            createInfo.pQueueFamilyIndices              = nullptr;  // Optional
         }
 
-        createInfo.preTransform                                 = SwapChainSupport.Capabilities.currentTransform;
-        createInfo.compositeAlpha                               = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        createInfo.preTransform                         = SwapChainSupport.Capabilities.currentTransform;
+        createInfo.compositeAlpha                       = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
-        createInfo.presentMode                                  = presentMode;
-        createInfo.clipped                                      = VK_TRUE;
+        createInfo.presentMode                          = presentMode;
+        createInfo.clipped                              = VK_TRUE;
 
-        createInfo.oldSwapchain                                 = m_OldSwapChain == nullptr ? VK_NULL_HANDLE : m_OldSwapChain->m_SwapChain;
+        createInfo.oldSwapchain                         = m_OldSwapChain == nullptr ? VK_NULL_HANDLE : m_OldSwapChain->m_SwapChain;
 
         if (vkCreateSwapchainKHR(m_Device.Device(), &createInfo, nullptr, &m_SwapChain) != VK_SUCCESS)
         {
@@ -207,8 +207,8 @@ namespace VulkanEngine {
         m_SwapChainImages.resize(imageCount);
         vkGetSwapchainImagesKHR(m_Device.Device(), m_SwapChain, &imageCount, m_SwapChainImages.data());
 
-        m_SwapChainImageFormat                                  = surfaceFormat.format;
-        m_SwapChainExtent                                       = extent;
+        m_SwapChainImageFormat                          = surfaceFormat.format;
+        m_SwapChainExtent                               = extent;
     }
 
     void VESwapChain::CreateImageViews()
@@ -219,15 +219,15 @@ namespace VulkanEngine {
         {
             VkImageViewCreateInfo viewInfo = {};
 
-            viewInfo.sType                                      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            viewInfo.image                                      = m_SwapChainImages[i];
-            viewInfo.viewType                                   = VK_IMAGE_VIEW_TYPE_2D;
-            viewInfo.format                                     = m_SwapChainImageFormat;
-            viewInfo.subresourceRange.aspectMask                = VK_IMAGE_ASPECT_COLOR_BIT;
-            viewInfo.subresourceRange.baseMipLevel              = 0;
-            viewInfo.subresourceRange.levelCount                = 1;
-            viewInfo.subresourceRange.baseArrayLayer            = 0;
-            viewInfo.subresourceRange.layerCount                = 1;
+            viewInfo.sType                              = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            viewInfo.image                              = m_SwapChainImages[i];
+            viewInfo.viewType                           = VK_IMAGE_VIEW_TYPE_2D;
+            viewInfo.format                             = m_SwapChainImageFormat;
+            viewInfo.subresourceRange.aspectMask        = VK_IMAGE_ASPECT_COLOR_BIT;
+            viewInfo.subresourceRange.baseMipLevel      = 0;
+            viewInfo.subresourceRange.levelCount        = 1;
+            viewInfo.subresourceRange.baseArrayLayer    = 0;
+            viewInfo.subresourceRange.layerCount        = 1;
 
             if (vkCreateImageView(m_Device.Device(), &viewInfo, nullptr, &m_SwapChainImageViews[i]) !=
                 VK_SUCCESS)
@@ -241,66 +241,66 @@ namespace VulkanEngine {
     {
         VkAttachmentDescription depthAttachment = {};
 
-        depthAttachment.format                                  = FindDepthFormat();
-        depthAttachment.samples                                 = VK_SAMPLE_COUNT_1_BIT;
-        depthAttachment.loadOp                                  = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachment.storeOp                                 = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.stencilLoadOp                           = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depthAttachment.stencilStoreOp                          = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.initialLayout                           = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachment.finalLayout                             = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachment.format                          = FindDepthFormat();
+        depthAttachment.samples                         = VK_SAMPLE_COUNT_1_BIT;
+        depthAttachment.loadOp                          = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachment.storeOp                         = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.stencilLoadOp                   = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthAttachment.stencilStoreOp                  = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.initialLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
+        depthAttachment.finalLayout                     = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkAttachmentReference depthAttachmentRef = {};
 
-        depthAttachmentRef.attachment                           = 1;
-        depthAttachmentRef.layout                               = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachmentRef.attachment                   = 1;
+        depthAttachmentRef.layout                       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkAttachmentDescription colorAttachment = {};
 
-        colorAttachment.format                                  = GetSwapChainImageFormat();
-        colorAttachment.samples                                 = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp                                  = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp                                 = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilStoreOp                          = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.stencilLoadOp                           = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.initialLayout                           = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout                             = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        colorAttachment.format                          = GetSwapChainImageFormat();
+        colorAttachment.samples                         = VK_SAMPLE_COUNT_1_BIT;
+        colorAttachment.loadOp                          = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachment.storeOp                         = VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachment.stencilStoreOp                  = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        colorAttachment.stencilLoadOp                   = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachment.initialLayout                   = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorAttachment.finalLayout                     = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
         VkAttachmentReference colorAttachmentRef = {};
 
-        colorAttachmentRef.attachment                           = 0;
-        colorAttachmentRef.layout                               = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        colorAttachmentRef.attachment                   = 0;
+        colorAttachmentRef.layout                       = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         VkSubpassDescription subpass = {};
 
-        subpass.pipelineBindPoint                               = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount                            = 1;
-        subpass.pColorAttachments                               = &colorAttachmentRef;
-        subpass.pDepthStencilAttachment                         = &depthAttachmentRef;
+        subpass.pipelineBindPoint                       = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount                    = 1;
+        subpass.pColorAttachments                       = &colorAttachmentRef;
+        subpass.pDepthStencilAttachment                 = &depthAttachmentRef;
 
         VkSubpassDependency dependency = {};
 
-        dependency.dstSubpass                                   = 0;
-        dependency.dstAccessMask                                = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                                                                  VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        dependency.dstStageMask                                 = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                                                                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.srcSubpass                                   = VK_SUBPASS_EXTERNAL;
-        dependency.srcAccessMask                                = 0;
-        dependency.srcStageMask                                 = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | 
-                                                                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.dstSubpass                           = 0;
+        dependency.dstAccessMask                        = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                                                          VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        dependency.dstStageMask                         = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                                                          VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.srcSubpass                           = VK_SUBPASS_EXTERNAL;
+        dependency.srcAccessMask                        = 0;
+        dependency.srcStageMask                         = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | 
+                                                          VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
-        std::array<VkAttachmentDescription, 2> attachments      = { colorAttachment, depthAttachment };
+        std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
 
         VkRenderPassCreateInfo renderPassInfo = {};
 
-        renderPassInfo.sType                                    = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.attachmentCount                          = static_cast<uint32_t>(attachments.size());
-        renderPassInfo.pAttachments                             = attachments.data();
-        renderPassInfo.subpassCount                             = 1;
-        renderPassInfo.pSubpasses                               = &subpass;
-        renderPassInfo.dependencyCount                          = 1;
-        renderPassInfo.pDependencies                            = &dependency;
+        renderPassInfo.sType                            = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount                  = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.pAttachments                     = attachments.data();
+        renderPassInfo.subpassCount                     = 1;
+        renderPassInfo.pSubpasses                       = &subpass;
+        renderPassInfo.dependencyCount                  = 1;
+        renderPassInfo.pDependencies                    = &dependency;
 
         if (vkCreateRenderPass(m_Device.Device(), &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
         {
@@ -314,18 +314,18 @@ namespace VulkanEngine {
 
         for (size_t i = 0; i < ImageCount(); i++)
         {
-            std::array<VkImageView, 2> attachments              = { m_SwapChainImageViews[i], m_DepthImageViews[i] };
+            std::array<VkImageView, 2> attachments      = { m_SwapChainImageViews[i], m_DepthImageViews[i] };
 
-            VkExtent2D SwapChainExtent                          = GetSwapChainExtent();
+            VkExtent2D SwapChainExtent                  = GetSwapChainExtent();
             VkFramebufferCreateInfo framebufferInfo = {};
 
-            framebufferInfo.sType                               = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferInfo.renderPass                          = m_RenderPass;
-            framebufferInfo.attachmentCount                     = static_cast<uint32_t>(attachments.size());
-            framebufferInfo.pAttachments                        = attachments.data();
-            framebufferInfo.width                               = SwapChainExtent.width;
-            framebufferInfo.height                              = SwapChainExtent.height;
-            framebufferInfo.layers                              = 1;
+            framebufferInfo.sType                       = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferInfo.renderPass                  = m_RenderPass;
+            framebufferInfo.attachmentCount             = static_cast<uint32_t>(attachments.size());
+            framebufferInfo.pAttachments                = attachments.data();
+            framebufferInfo.width                       = SwapChainExtent.width;
+            framebufferInfo.height                      = SwapChainExtent.height;
+            framebufferInfo.layers                      = 1;
 
             if (vkCreateFramebuffer(
                 m_Device.Device(),
@@ -340,9 +340,9 @@ namespace VulkanEngine {
 
     void VESwapChain::CreateDepthResources()
     {
-        VkFormat depthFormat                                    = FindDepthFormat();
-        m_SwapChainDepthFormat                                  = depthFormat;
-        VkExtent2D SwapChainExtent                              = GetSwapChainExtent();
+        VkFormat depthFormat                            = FindDepthFormat();
+        m_SwapChainDepthFormat                          = depthFormat;
+        VkExtent2D SwapChainExtent                      = GetSwapChainExtent();
 
         m_DepthImages.resize(ImageCount());
         m_DepthImageMemorys.resize(ImageCount());
@@ -352,19 +352,19 @@ namespace VulkanEngine {
         {
             VkImageCreateInfo imageInfo = {};
 
-            imageInfo.sType                                     = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-            imageInfo.imageType                                 = VK_IMAGE_TYPE_2D;
-            imageInfo.extent.width                              = SwapChainExtent.width;
-            imageInfo.extent.height                             = SwapChainExtent.height;
-            imageInfo.extent.depth                              = 1;
-            imageInfo.mipLevels                                 = 1;
-            imageInfo.arrayLayers                               = 1;
-            imageInfo.format                                    = depthFormat;
-            imageInfo.tiling                                    = VK_IMAGE_TILING_OPTIMAL;
-            imageInfo.initialLayout                             = VK_IMAGE_LAYOUT_UNDEFINED;
-            imageInfo.usage                                     = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-            imageInfo.samples                                   = VK_SAMPLE_COUNT_1_BIT;
-            imageInfo.sharingMode                               = VK_SHARING_MODE_EXCLUSIVE;
+            imageInfo.sType                             = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+            imageInfo.imageType                         = VK_IMAGE_TYPE_2D;
+            imageInfo.extent.width                      = SwapChainExtent.width;
+            imageInfo.extent.height                     = SwapChainExtent.height;
+            imageInfo.extent.depth                      = 1;
+            imageInfo.mipLevels                         = 1;
+            imageInfo.arrayLayers                       = 1;
+            imageInfo.format                            = depthFormat;
+            imageInfo.tiling                            = VK_IMAGE_TILING_OPTIMAL;
+            imageInfo.initialLayout                     = VK_IMAGE_LAYOUT_UNDEFINED;
+            imageInfo.usage                             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+            imageInfo.samples                           = VK_SAMPLE_COUNT_1_BIT;
+            imageInfo.sharingMode                       = VK_SHARING_MODE_EXCLUSIVE;
             imageInfo.flags = 0;
 
             m_Device.CreateImageWithInfo(
@@ -374,15 +374,15 @@ namespace VulkanEngine {
                 m_DepthImageMemorys[i]);
 
             VkImageViewCreateInfo viewInfo{};
-            viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            viewInfo.image = m_DepthImages[i];
-            viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            viewInfo.format = depthFormat;
-            viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-            viewInfo.subresourceRange.baseMipLevel = 0;
-            viewInfo.subresourceRange.levelCount = 1;
-            viewInfo.subresourceRange.baseArrayLayer = 0;
-            viewInfo.subresourceRange.layerCount = 1;
+            viewInfo.sType                              = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            viewInfo.image                              = m_DepthImages[i];
+            viewInfo.viewType                           = VK_IMAGE_VIEW_TYPE_2D;
+            viewInfo.format                             = depthFormat;
+            viewInfo.subresourceRange.aspectMask        = VK_IMAGE_ASPECT_DEPTH_BIT;
+            viewInfo.subresourceRange.baseMipLevel      = 0;
+            viewInfo.subresourceRange.levelCount        = 1;
+            viewInfo.subresourceRange.baseArrayLayer    = 0;
+            viewInfo.subresourceRange.layerCount        = 1;
 
             if (vkCreateImageView(m_Device.Device(), &viewInfo, nullptr, &m_DepthImageViews[i]) != VK_SUCCESS)
             {

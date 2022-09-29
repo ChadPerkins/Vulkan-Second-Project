@@ -14,8 +14,7 @@ namespace VulkanEngine {
 
 	struct SimplePushConstantData
 	{
-		glm::mat2 Transform{ 1.0f };
-		glm::vec2 Offset;
+		glm::mat4 Transform{ 1.0f };
 		alignas(16) glm::vec3 Color;
 	};
 
@@ -35,17 +34,18 @@ namespace VulkanEngine {
 	{
 		VkPushConstantRange pushConstantRange = {};
 
-		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		pushConstantRange.offset = 0;
-		pushConstantRange.size = sizeof(SimplePushConstantData);
+		pushConstantRange.stageFlags				= VK_SHADER_STAGE_VERTEX_BIT |
+													  VK_SHADER_STAGE_FRAGMENT_BIT;
+		pushConstantRange.offset					= 0;
+		pushConstantRange.size						= sizeof(SimplePushConstantData);
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 
-		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0;
-		pipelineLayoutInfo.pSetLayouts = nullptr;
-		pipelineLayoutInfo.pushConstantRangeCount = 1;
-		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+		pipelineLayoutInfo.sType					= VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount			= 0;
+		pipelineLayoutInfo.pSetLayouts				= nullptr;
+		pipelineLayoutInfo.pushConstantRangeCount	= 1;
+		pipelineLayoutInfo.pPushConstantRanges		= &pushConstantRange;
 
 		if (vkCreatePipelineLayout(m_Device.Device(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS)
 		{
@@ -61,8 +61,8 @@ namespace VulkanEngine {
 
 		VEPipeline::DefaultPipelineConfigInfo(pipelineConfig);
 
-		pipelineConfig.RenderPass = renderPass;
-		pipelineConfig.PipelineLayout = m_PipelineLayout;
+		pipelineConfig.RenderPass					= renderPass;
+		pipelineConfig.PipelineLayout				= m_PipelineLayout;
 
 		m_Pipeline = std::make_unique<VEPipeline>(m_Device,
 			"shaders/simple_shader.vert.spv",
@@ -76,13 +76,13 @@ namespace VulkanEngine {
 
 		for (auto& obj : gameObjects)
 		{
-			obj.m_Transform2D.Rotation = glm::mod(obj.m_Transform2D.Rotation + 0.01f, glm::two_pi<float>());
+			obj.m_Transform.Rotation.y				= glm::mod(obj.m_Transform.Rotation.y + 0.01f, glm::two_pi<float>());
+			obj.m_Transform.Rotation.x				= glm::mod(obj.m_Transform.Rotation.x + 0.005f, glm::two_pi<float>());
 
 			SimplePushConstantData push = {};
 
-			push.Offset = obj.m_Transform2D.Translation;
-			push.Color = obj.m_Color;
-			push.Transform = obj.m_Transform2D.Mat2();
+			push.Color								 = obj.m_Color;
+			push.Transform							 = obj.m_Transform.Mat4();
 
 			vkCmdPushConstants(commandBuffer,
 				m_PipelineLayout,
