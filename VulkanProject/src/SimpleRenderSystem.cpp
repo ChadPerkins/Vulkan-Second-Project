@@ -70,7 +70,7 @@ namespace VulkanEngine {
 			pipelineConfig);
 	}
 
-	void SimpleRenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<VEGameObject>& gameObjects)
+	void SimpleRenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<VEGameObject>& gameObjects, const VECamera& camera)
 	{
 		m_Pipeline->Bind(commandBuffer);
 
@@ -82,7 +82,7 @@ namespace VulkanEngine {
 			SimplePushConstantData push = {};
 
 			push.Color								 = obj.m_Color;
-			push.Transform							 = obj.m_Transform.Mat4();
+			push.Transform							 = camera.GetProjection() * obj.m_Transform.Mat4();
 
 			vkCmdPushConstants(commandBuffer,
 				m_PipelineLayout,

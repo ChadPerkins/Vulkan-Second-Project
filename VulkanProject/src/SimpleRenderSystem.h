@@ -1,4 +1,5 @@
 #pragma once
+#include "VE_Camera.h"
 #include "VE_Device.h"
 #include "VE_GameObject.h"
 #include "VE_Pipeline.h"
@@ -19,7 +20,9 @@ namespace VulkanEngine {
 		SimpleRenderSystem(const SimpleRenderSystem&) = delete;
 		SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
-		void RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<VEGameObject>& gameObjects);
+		void RenderGameObjects(VkCommandBuffer commandBuffer,
+			std::vector<VEGameObject>& gameObjects,
+			const VECamera& camera);
 
 	private:
 		void CreatePipelineLayout();

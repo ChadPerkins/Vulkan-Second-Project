@@ -142,6 +142,7 @@
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\SimpleRenderSystem.cpp" />
+    <ClCompile Include="src\VE_Camera.cpp" />
     <ClCompile Include="src\VE_Device.cpp" />
     <ClCompile Include="src\VE_Model.cpp" />
     <ClCompile Include="src\VE_Pipeline.cpp" />
@@ -152,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\SimpleRenderSystem.h" />
+    <ClInclude Include="src\VE_Camera.h" />
     <ClInclude Include="src\VE_Device.h" />
     <ClInclude Include="src\VE_GameObject.h" />
     <ClInclude Include="src\VE_Model.h" />

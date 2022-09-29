@@ -20,7 +20,7 @@ namespace VulkanEngine {
 		VERenderer& operator=(const VERenderer&) = delete;
 
 		VkRenderPass GetSwapChainRenderPass() const { return m_SwapChain->GetRenderPass(); }
-
+		float GetAspectRatio() const { return m_SwapChain->ExtentAspectRatio(); }
 		bool IsFrameInProgress() const { return m_IsFrameStarted; }
 
 		VkCommandBuffer GetCurrentCommandBuffer() const 

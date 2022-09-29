@@ -1,6 +1,8 @@
 #include "Application.h"
 #include "SimpleRenderSystem.h"
 
+#include "VE_Camera.h"
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -27,14 +29,19 @@ namespace VulkanEngine {
 	{
 		SimpleRenderSystem simpleRenderSystem(device, renderer.GetSwapChainRenderPass());
 
+		VECamera camera = {};
+
 		while (!window.Close())
 		{
 			glfwPollEvents();
 			
+			float aspect = renderer.GetAspectRatio();
+			//camera.SetOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+			camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
 			if (auto commandBuffer = renderer.BeginFrame())
 			{
 				renderer.BeginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.RenderGameObjects(commandBuffer, gameObjects);
+				simpleRenderSystem.RenderGameObjects(commandBuffer, gameObjects, camera);
 				renderer.EndSwapChainRenderPass(commandBuffer);
 				renderer.EndFrame();
 			}
@@ -109,7 +116,7 @@ namespace VulkanEngine {
 
 		auto cube	= VEGameObject::CreateGameObject();
 		cube.m_Model					= model;
-		cube.m_Transform.Translation	= { 0.0f, 0.0f, 0.5f };
+		cube.m_Transform.Translation	= { 0.0f, 0.0f, 2.5f };
 		cube.m_Transform.Scale			= { 0.5f, 0.5f, 0.5f };
 
 		gameObjects.push_back(std::move(cube));
