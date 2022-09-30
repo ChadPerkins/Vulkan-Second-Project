@@ -78,9 +78,6 @@ namespace VulkanEngine {
 
 		for (auto& obj : gameObjects)
 		{
-			obj.m_Transform.Rotation.y				= glm::mod(obj.m_Transform.Rotation.y + 0.01f, glm::two_pi<float>());
-			obj.m_Transform.Rotation.x				= glm::mod(obj.m_Transform.Rotation.x + 0.005f, glm::two_pi<float>());
-
 			SimplePushConstantData push = {};
 
 			push.Color								 = obj.m_Color;

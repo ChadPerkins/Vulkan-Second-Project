@@ -15,11 +15,13 @@ namespace VulkanEngine {
 		VEWindow(const VEWindow&) = delete;
 		VEWindow& operator=(const VEWindow&) = delete;
 
-		bool Close() { return glfwWindowShouldClose(m_Window); }
 		VkExtent2D GetExtent() { return { m_Width, m_Height }; }
+		GLFWwindow* GetWindow() const { return m_Window; }
+
+		bool Close() { return glfwWindowShouldClose(m_Window); }
 		bool WasWindowResized() { return m_FramebufferResized; }
 		void ResetWindowResizeFlag() { m_FramebufferResized = false; }
-
+		
 		void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
 	private:

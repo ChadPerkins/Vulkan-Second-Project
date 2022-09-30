@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "InputController.h"
 #include "SimpleRenderSystem.h"
 
 #include "VE_Camera.h"
@@ -10,6 +11,7 @@
 
 #include <array>
 #include <cassert>
+#include <chrono>
 #include <iostream>
 #include <stdexcept>
 
@@ -30,16 +32,27 @@ namespace VulkanEngine {
 		SimpleRenderSystem simpleRenderSystem(device, renderer.GetSwapChainRenderPass());
 
 		VECamera camera = {};
-		//camera.SetViewDirection(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
-		camera.SetViewTarget(glm::vec3{ -1.0f, -2.0f, -2.0f }, glm::vec3{ 0.0f, 0.0f, 2.5f });
+
+		auto viewerObject = VEGameObject::CreateGameObject();
+
+		InputController cameraController = {};
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
 
 		while (!window.Close())
 		{
 			glfwPollEvents();
-			
+
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			currentTime = newTime;
+
+			cameraController.MoveInPlaneXZ(window.GetWindow(), frameTime, viewerObject);
+			camera.SetViewYXZ(viewerObject.m_Transform.Translation, viewerObject.m_Transform.Rotation);
+
 			float aspect = renderer.GetAspectRatio();
-			//camera.SetOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
 			camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+			
 			if (auto commandBuffer = renderer.BeginFrame())
 			{
 				renderer.BeginSwapChainRenderPass(commandBuffer);
@@ -58,52 +71,52 @@ namespace VulkanEngine {
 		std::vector<VEModel::Vertex> vertices{
 
 			// left face (white)
-			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-			{{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-			{{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+			{{ -0.5f, -0.5f, -0.5f }, { 0.9f, 0.9f, 0.9f }},
+			{{ -0.5f,  0.5f,  0.5f }, { 0.9f, 0.9f, 0.9f }},
+			{{ -0.5f, -0.5f,  0.5f }, { 0.9f, 0.9f, 0.9f }},
+			{{ -0.5f, -0.5f, -0.5f }, { 0.9f, 0.9f, 0.9f }},
+			{{ -0.5f,  0.5f, -0.5f }, { 0.9f, 0.9f, 0.9f }},
+			{{ -0.5f,  0.5f,  0.5f }, { 0.9f, 0.9f, 0.9f }},
 
 			// right face (yellow)
-			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-			{{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
-			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-			{{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+			{{ 0.5f, -0.5f, -0.5f }, { 0.8f, 0.8f, 0.1f }},
+			{{ 0.5f,  0.5f,  0.5f }, { 0.8f, 0.8f, 0.1f }},
+			{{ 0.5f, -0.5f,  0.5f }, { 0.8f, 0.8f, 0.1f }},
+			{{ 0.5f, -0.5f, -0.5f }, { 0.8f, 0.8f, 0.1f }},
+			{{ 0.5f,  0.5f, -0.5f }, { 0.8f, 0.8f, 0.1f }},
+			{{ 0.5f,  0.5f,  0.5f }, { 0.8f, 0.8f, 0.1f }},
 
 			// top face (orange, remember y axis points down)
-			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-			{{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-			{{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+			{{ -0.5f, -0.5f, -0.5f }, { 0.9f, 0.6f, 0.1f }},
+			{{  0.5f, -0.5f,  0.5f }, { 0.9f, 0.6f, 0.1f }},
+			{{ -0.5f, -0.5f,  0.5f }, { 0.9f, 0.6f, 0.1f }},
+			{{ -0.5f, -0.5f, -0.5f }, { 0.9f, 0.6f, 0.1f }},
+			{{  0.5f, -0.5f, -0.5f }, { 0.9f, 0.6f, 0.1f }},
+			{{  0.5f, -0.5f,  0.5f }, { 0.9f, 0.6f, 0.1f }},
 
 			// bottom face (red)
-			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-			{{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
-			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-			{{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+			{{ -0.5f, 0.5f, -0.5f }, { 0.8f, 0.1f, 0.1f }},
+			{{  0.5f, 0.5f,  0.5f }, { 0.8f, 0.1f, 0.1f }},
+			{{ -0.5f, 0.5f,  0.5f }, { 0.8f, 0.1f, 0.1f }},
+			{{ -0.5f, 0.5f, -0.5f }, { 0.8f, 0.1f, 0.1f }},
+			{{  0.5f, 0.5f, -0.5f }, { 0.8f, 0.1f, 0.1f }},
+			{{  0.5f, 0.5f,  0.5f }, { 0.8f, 0.1f, 0.1f }},
 
 			// nose face (blue)
-			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-			{{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-			{{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+			{{ -0.5f, -0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
+			{{  0.5f,  0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
+			{{ -0.5f,  0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
+			{{ -0.5f, -0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
+			{{  0.5f, -0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
+			{{  0.5f,  0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
 
 			// tail face (green)
-			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-			{{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-			{{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+			{{ -0.5f, -0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
+			{{  0.5f,  0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
+			{{ -0.5f,  0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
+			{{ -0.5f, -0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
+			{{  0.5f, -0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
+			{{  0.5f,  0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
 
 		};
 		for (auto& v : vertices) {
