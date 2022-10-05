@@ -21,7 +21,13 @@ namespace VulkanEngine {
 			static std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
 		};
 
-		VEModel(VEDevice& device, const std::vector<Vertex>& vertices);
+		struct Builder
+		{
+			std::vector<Vertex> Vertices{};
+			std::vector<uint32_t> Indices{};
+		};
+
+		VEModel(VEDevice& device, const VEModel::Builder& builder);
 		~VEModel();
 
 		// Delete the copy constructor and copy operator
@@ -33,11 +39,18 @@ namespace VulkanEngine {
 
 	private:
 		void CreateVertexBuffers(const std::vector<Vertex>& vertices);
+		void CreateIndexBuffers(const std::vector<uint32_t>& indices);
 
 	private:
 		VEDevice& m_Device;
 		VkBuffer m_VertexBuffer;
 		VkDeviceMemory m_VertexBufferMemory;
 		uint32_t m_VertexCount;
+
+		bool m_HasIndexBuffer = false;
+
+		VkBuffer m_IndexBuffer;
+		VkDeviceMemory m_IndexBufferMemory;
+		uint32_t m_IndexCount;
 	};
 }

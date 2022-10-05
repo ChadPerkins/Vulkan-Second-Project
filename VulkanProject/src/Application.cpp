@@ -67,62 +67,62 @@ namespace VulkanEngine {
 	}
 
 	// temporary helper function, creates a 1x1x1 cube centered at offset
-	std::unique_ptr<VEModel> CreateCubeModel(VEDevice& device, glm::vec3 offset) {
-		std::vector<VEModel::Vertex> vertices{
+	std::unique_ptr<VEModel> CreateCubeModel(VEDevice& device, glm::vec3 offset)
+	{
+		VEModel::Builder modelBuilder = {};
+
+		modelBuilder.Vertices = {
 
 			// left face (white)
 			{{ -0.5f, -0.5f, -0.5f }, { 0.9f, 0.9f, 0.9f }},
 			{{ -0.5f,  0.5f,  0.5f }, { 0.9f, 0.9f, 0.9f }},
 			{{ -0.5f, -0.5f,  0.5f }, { 0.9f, 0.9f, 0.9f }},
-			{{ -0.5f, -0.5f, -0.5f }, { 0.9f, 0.9f, 0.9f }},
 			{{ -0.5f,  0.5f, -0.5f }, { 0.9f, 0.9f, 0.9f }},
-			{{ -0.5f,  0.5f,  0.5f }, { 0.9f, 0.9f, 0.9f }},
 
-			// right face (yellow)
-			{{ 0.5f, -0.5f, -0.5f }, { 0.8f, 0.8f, 0.1f }},
-			{{ 0.5f,  0.5f,  0.5f }, { 0.8f, 0.8f, 0.1f }},
-			{{ 0.5f, -0.5f,  0.5f }, { 0.8f, 0.8f, 0.1f }},
-			{{ 0.5f, -0.5f, -0.5f }, { 0.8f, 0.8f, 0.1f }},
-			{{ 0.5f,  0.5f, -0.5f }, { 0.8f, 0.8f, 0.1f }},
-			{{ 0.5f,  0.5f,  0.5f }, { 0.8f, 0.8f, 0.1f }},
+	 		//  right face (yellow)
+			{{  0.5f, -0.5f, -0.5f }, { 0.8f, 0.8f, 0.1f }},
+			{{  0.5f,  0.5f,  0.5f }, { 0.8f, 0.8f, 0.1f }},
+			{{  0.5f, -0.5f,  0.5f }, { 0.8f, 0.8f, 0.1f }},
+			{{  0.5f,  0.5f, -0.5f }, { 0.8f, 0.8f, 0.1f }},
 
-			// top face (orange, remember y axis points down)
+	 		//  top face (orange, remember y axis points down)
 			{{ -0.5f, -0.5f, -0.5f }, { 0.9f, 0.6f, 0.1f }},
 			{{  0.5f, -0.5f,  0.5f }, { 0.9f, 0.6f, 0.1f }},
 			{{ -0.5f, -0.5f,  0.5f }, { 0.9f, 0.6f, 0.1f }},
-			{{ -0.5f, -0.5f, -0.5f }, { 0.9f, 0.6f, 0.1f }},
 			{{  0.5f, -0.5f, -0.5f }, { 0.9f, 0.6f, 0.1f }},
-			{{  0.5f, -0.5f,  0.5f }, { 0.9f, 0.6f, 0.1f }},
 
-			// bottom face (red)
-			{{ -0.5f, 0.5f, -0.5f }, { 0.8f, 0.1f, 0.1f }},
-			{{  0.5f, 0.5f,  0.5f }, { 0.8f, 0.1f, 0.1f }},
-			{{ -0.5f, 0.5f,  0.5f }, { 0.8f, 0.1f, 0.1f }},
-			{{ -0.5f, 0.5f, -0.5f }, { 0.8f, 0.1f, 0.1f }},
-			{{  0.5f, 0.5f, -0.5f }, { 0.8f, 0.1f, 0.1f }},
-			{{  0.5f, 0.5f,  0.5f }, { 0.8f, 0.1f, 0.1f }},
+	 		//  bottom face (red)
+			{{ -0.5f,  0.5f, -0.5f }, { 0.8f, 0.1f, 0.1f }},
+			{{  0.5f,  0.5f,  0.5f }, { 0.8f, 0.1f, 0.1f }},
+			{{ -0.5f,  0.5f,  0.5f }, { 0.8f, 0.1f, 0.1f }},
+			{{  0.5f,  0.5f, -0.5f }, { 0.8f, 0.1f, 0.1f }},
 
-			// nose face (blue)
-			{{ -0.5f, -0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
-			{{  0.5f,  0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
-			{{ -0.5f,  0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
-			{{ -0.5f, -0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
-			{{  0.5f, -0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
-			{{  0.5f,  0.5f, 0.5f }, { 0.1f, 0.1f, 0.8f }},
+	 		//  nose face (blue)
+			{{ -0.5f, -0.5f,  0.5f }, { 0.1f, 0.1f, 0.8f }},
+			{{  0.5f,  0.5f,  0.5f }, { 0.1f, 0.1f, 0.8f }},
+			{{ -0.5f,  0.5f,  0.5f }, { 0.1f, 0.1f, 0.8f }},
+			{{  0.5f, -0.5f,  0.5f }, { 0.1f, 0.1f, 0.8f }},
 
-			// tail face (green)
+	 		//  tail face (green)
 			{{ -0.5f, -0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
 			{{  0.5f,  0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
 			{{ -0.5f,  0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
-			{{ -0.5f, -0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
-			{{  0.5f, -0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
-			{{  0.5f,  0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
+			{{  0.5f, -0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }}
 
 		};
-		for (auto& v : vertices) {
+
+		for (auto& v : modelBuilder.Vertices)
+		{
 			v.position += offset;
 		}
-		return std::make_unique<VEModel>(device, vertices);
+
+		modelBuilder.Indices = {
+			0,  1,  2,  0,  3,  1,  4,  5,  6,  4,  7,  5,  8,  9,  10, 8,  11, 9,
+			12, 13, 14, 12, 15, 13, 16, 17, 18, 16, 19, 17, 20, 21, 22, 20, 23, 21
+		};
+
+
+		return std::make_unique<VEModel>(device, modelBuilder);
 	}
 
 	void Application::LoadGameObjects()
