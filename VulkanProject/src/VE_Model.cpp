@@ -1,8 +1,29 @@
 #include "VE_Model.h"
+#include "VE_Utils.h"
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 
 #include <cassert>
+#include <unordered_map>
+
+namespace std {
+	template <>
+	struct hash<VulkanEngine::VEModel::Vertex>
+	{
+		size_t operator()(VulkanEngine::VEModel::Vertex const& vertex) const
+		{
+			size_t seed = 0;
+			VulkanEngine::HashCombine(seed, vertex.Position, vertex.Color, vertex.Normal, vertex.UV);
+			return seed;
+		}
+	};
+}
 
 namespace VulkanEngine {
+
 	VEModel::VEModel(VEDevice& device, const VEModel::Builder& builder)
 		: m_Device{device}
 	{
@@ -21,6 +42,14 @@ namespace VulkanEngine {
 			vkFreeMemory(m_Device.Device(), m_IndexBufferMemory, nullptr);
 
 		}
+	}
+
+	std::unique_ptr<VEModel> VEModel::CreateModelFromFile(VEDevice& device, const std::string& filepath)
+	{
+		Builder builder = {};
+		builder.LoadModel(filepath);
+
+		return std::make_unique<VEModel>(device, builder);
 	}
 
 	void VEModel::CreateVertexBuffers(const std::vector<Vertex>& vertices)
@@ -134,6 +163,7 @@ namespace VulkanEngine {
 			vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		}
 	}
+
 	std::vector<VkVertexInputBindingDescription> VEModel::Vertex::GetBindingDescriptions()
 	{
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
@@ -144,6 +174,7 @@ namespace VulkanEngine {
 
 		return bindingDescriptions;
 	}
+
 	std::vector<VkVertexInputAttributeDescription> VEModel::Vertex::GetAttributeDescriptions()
 	{
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
@@ -151,13 +182,88 @@ namespace VulkanEngine {
 		attributeDescriptions[0].binding	= 0;
 		attributeDescriptions[0].location	= 0;
 		attributeDescriptions[0].format		= VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[0].offset		= offsetof(Vertex, position);
+		attributeDescriptions[0].offset		= offsetof(Vertex, Position);
 
 		attributeDescriptions[1].binding	= 0;
 		attributeDescriptions[1].location	= 1;
 		attributeDescriptions[1].format		= VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset		= offsetof(Vertex, color);
+		attributeDescriptions[1].offset		= offsetof(Vertex, Color);
 
 		return attributeDescriptions;
+	}
+
+	void VEModel::Builder::LoadModel(const std::string& filepath)
+	{
+		tinyobj::attrib_t attrib;
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+		std::string warn, error;
+
+		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &error, filepath.c_str()))
+		{
+			throw std::runtime_error(warn + error);
+		}
+
+		Vertices.clear();
+		Indices.clear();
+
+		std::unordered_map<Vertex, uint32_t> uniqueVertices = {};
+
+		for (const auto& shape : shapes)
+		{
+			for (const auto& index : shape.mesh.indices)
+			{
+				Vertex vertex = {};
+
+				if (index.vertex_index >= 0)
+				{
+					vertex.Position = {
+						attrib.vertices[3 * index.vertex_index + 0],
+						attrib.vertices[3 * index.vertex_index + 1],
+						attrib.vertices[3 * index.vertex_index + 2]
+					};
+
+					auto colorIndex = 3 * index.vertex_index + 2;
+
+					if (colorIndex < attrib.colors.size())
+					{
+						vertex.Color = {
+							attrib.colors[colorIndex - 2],
+							attrib.colors[colorIndex - 1],
+							attrib.colors[colorIndex - 0]
+						};
+					}
+					else
+					{
+						vertex.Color = { 1.0f, 1.0f, 1.0f };
+					}
+				}
+
+				if (index.normal_index >= 0)
+				{
+					vertex.Normal = {
+						attrib.normals[3 * index.normal_index + 0],
+						attrib.normals[3 * index.normal_index + 1],
+						attrib.normals[3 * index.normal_index + 2]
+					};
+				}
+
+				if (index.texcoord_index >= 0)
+				{
+					vertex.UV = {
+						attrib.texcoords[2 * index.texcoord_index + 0],
+						attrib.texcoords[2 * index.texcoord_index + 1]
+					};
+				}
+
+				if (uniqueVertices.count(vertex) == 0)
+				{
+					uniqueVertices[vertex] = static_cast<uint32_t>(Vertices.size());
+					Vertices.push_back(vertex);
+				}
+
+				Indices.push_back(uniqueVertices[vertex]);
+			}
+		}
 	}
 }

@@ -66,75 +66,16 @@ namespace VulkanEngine {
 		vkDeviceWaitIdle(device.Device());
 	}
 
-	// temporary helper function, creates a 1x1x1 cube centered at offset
-	std::unique_ptr<VEModel> CreateCubeModel(VEDevice& device, glm::vec3 offset)
-	{
-		VEModel::Builder modelBuilder = {};
-
-		modelBuilder.Vertices = {
-
-			// left face (white)
-			{{ -0.5f, -0.5f, -0.5f }, { 0.9f, 0.9f, 0.9f }},
-			{{ -0.5f,  0.5f,  0.5f }, { 0.9f, 0.9f, 0.9f }},
-			{{ -0.5f, -0.5f,  0.5f }, { 0.9f, 0.9f, 0.9f }},
-			{{ -0.5f,  0.5f, -0.5f }, { 0.9f, 0.9f, 0.9f }},
-
-	 		//  right face (yellow)
-			{{  0.5f, -0.5f, -0.5f }, { 0.8f, 0.8f, 0.1f }},
-			{{  0.5f,  0.5f,  0.5f }, { 0.8f, 0.8f, 0.1f }},
-			{{  0.5f, -0.5f,  0.5f }, { 0.8f, 0.8f, 0.1f }},
-			{{  0.5f,  0.5f, -0.5f }, { 0.8f, 0.8f, 0.1f }},
-
-	 		//  top face (orange, remember y axis points down)
-			{{ -0.5f, -0.5f, -0.5f }, { 0.9f, 0.6f, 0.1f }},
-			{{  0.5f, -0.5f,  0.5f }, { 0.9f, 0.6f, 0.1f }},
-			{{ -0.5f, -0.5f,  0.5f }, { 0.9f, 0.6f, 0.1f }},
-			{{  0.5f, -0.5f, -0.5f }, { 0.9f, 0.6f, 0.1f }},
-
-	 		//  bottom face (red)
-			{{ -0.5f,  0.5f, -0.5f }, { 0.8f, 0.1f, 0.1f }},
-			{{  0.5f,  0.5f,  0.5f }, { 0.8f, 0.1f, 0.1f }},
-			{{ -0.5f,  0.5f,  0.5f }, { 0.8f, 0.1f, 0.1f }},
-			{{  0.5f,  0.5f, -0.5f }, { 0.8f, 0.1f, 0.1f }},
-
-	 		//  nose face (blue)
-			{{ -0.5f, -0.5f,  0.5f }, { 0.1f, 0.1f, 0.8f }},
-			{{  0.5f,  0.5f,  0.5f }, { 0.1f, 0.1f, 0.8f }},
-			{{ -0.5f,  0.5f,  0.5f }, { 0.1f, 0.1f, 0.8f }},
-			{{  0.5f, -0.5f,  0.5f }, { 0.1f, 0.1f, 0.8f }},
-
-	 		//  tail face (green)
-			{{ -0.5f, -0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
-			{{  0.5f,  0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
-			{{ -0.5f,  0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }},
-			{{  0.5f, -0.5f, -0.5f }, { 0.1f, 0.8f, 0.1f }}
-
-		};
-
-		for (auto& v : modelBuilder.Vertices)
-		{
-			v.position += offset;
-		}
-
-		modelBuilder.Indices = {
-			0,  1,  2,  0,  3,  1,  4,  5,  6,  4,  7,  5,  8,  9,  10, 8,  11, 9,
-			12, 13, 14, 12, 15, 13, 16, 17, 18, 16, 19, 17, 20, 21, 22, 20, 23, 21
-		};
-
-
-		return std::make_unique<VEModel>(device, modelBuilder);
-	}
-
 	void Application::LoadGameObjects()
 	{
-		std::shared_ptr<VEModel> model	= CreateCubeModel(device, { 0.0f,0.0f, 0.0f });
+		std::shared_ptr<VEModel> model	= VEModel::CreateModelFromFile(device, "Models/smooth_vase.obj");
 
-		auto cube	= VEGameObject::CreateGameObject();
-		cube.m_Model					= model;
-		cube.m_Transform.Translation	= { 0.0f, 0.0f, 2.5f };
-		cube.m_Transform.Scale			= { 0.5f, 0.5f, 0.5f };
+		auto gameObj = VEGameObject::CreateGameObject();
+		gameObj.m_Model					= model;
+		gameObj.m_Transform.Translation	= { 0.0f, 0.0f, 2.5f };
+		gameObj.m_Transform.Scale			= glm::vec3(3.0f);
 
-		gameObjects.push_back(std::move(cube));
+		gameObjects.push_back(std::move(gameObj));
 	}
 	
 }
