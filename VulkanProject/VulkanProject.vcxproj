@@ -149,6 +149,7 @@
     <ClCompile Include="src\SimpleRenderSystem.cpp" />
     <ClCompile Include="src\VE_Camera.cpp" />
     <ClCompile Include="src\VE_Device.cpp" />
+    <ClCompile Include="src\VE_GameObject.cpp" />
     <ClCompile Include="src\VE_Model.cpp" />
     <ClCompile Include="src\VE_Pipeline.cpp" />
     <ClCompile Include="src\VE_Renderer.cpp" />

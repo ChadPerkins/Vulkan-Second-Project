@@ -68,14 +68,23 @@ namespace VulkanEngine {
 
 	void Application::LoadGameObjects()
 	{
-		std::shared_ptr<VEModel> model	= VEModel::CreateModelFromFile(device, "Models/smooth_vase.obj");
+		std::shared_ptr<VEModel> model		= VEModel::CreateModelFromFile(device, "Models/flat_vase.obj");
 
-		auto gameObj = VEGameObject::CreateGameObject();
-		gameObj.m_Model					= model;
-		gameObj.m_Transform.Translation	= { 0.0f, 0.0f, 2.5f };
-		gameObj.m_Transform.Scale			= glm::vec3(3.0f);
+		auto flatVase	= VEGameObject::CreateGameObject();
+		flatVase.m_Model						= model;
+		flatVase.m_Transform.Translation		= { -0.5f, 0.5f, 2.5f };
+		flatVase.m_Transform.Scale			= { 3.0f, 1.5f, 3.0f };
 
-		gameObjects.push_back(std::move(gameObj));
+		gameObjects.push_back(std::move(flatVase));
+
+		model								 = VEModel::CreateModelFromFile(device, "Models/smooth_vase.obj");
+
+		auto smoothVase	= VEGameObject::CreateGameObject();
+		smoothVase.m_Model						= model;
+		smoothVase.m_Transform.Translation		= { 0.5f, 0.5f, 2.5f };
+		smoothVase.m_Transform.Scale			= { 3.0f, 1.5f, 3.0f };
+
+		gameObjects.push_back(std::move(smoothVase));
 	}
 	
 }

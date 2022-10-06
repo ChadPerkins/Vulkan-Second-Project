@@ -15,7 +15,7 @@ namespace VulkanEngine {
 	struct SimplePushConstantData
 	{
 		glm::mat4 Transform{ 1.0f };
-		alignas(16) glm::vec3 Color;
+		glm::mat4 NormalMatrix{ 1.0f };
 	};
 
 	SimpleRenderSystem::SimpleRenderSystem(VEDevice& device, VkRenderPass renderPass)
@@ -80,8 +80,9 @@ namespace VulkanEngine {
 		{
 			SimplePushConstantData push = {};
 
-			push.Color								 = obj.m_Color;
-			push.Transform							 = projectionView * obj.m_Transform.Mat4();
+			auto modelMatrix					= obj.m_Transform.Mat4();
+			push.Transform							= projectionView * modelMatrix;
+			push.NormalMatrix						= obj.m_Transform.NormalMatrix();
 
 			vkCmdPushConstants(commandBuffer,
 				m_PipelineLayout,
