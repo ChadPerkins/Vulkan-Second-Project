@@ -147,7 +147,9 @@
     <ClCompile Include="src\InputController.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\SimpleRenderSystem.cpp" />
+    <ClCompile Include="src\VE_Buffer.cpp" />
     <ClCompile Include="src\VE_Camera.cpp" />
+    <ClCompile Include="src\VE_Descriptors.cpp" />
     <ClCompile Include="src\VE_Device.cpp" />
     <ClCompile Include="src\VE_GameObject.cpp" />
     <ClCompile Include="src\VE_Model.cpp" />
@@ -161,8 +163,11 @@
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\InputController.h" />
     <ClInclude Include="src\SimpleRenderSystem.h" />
+    <ClInclude Include="src\VE_Buffer.h" />
     <ClInclude Include="src\VE_Camera.h" />
+    <ClInclude Include="src\VE_Descriptors.h" />
     <ClInclude Include="src\VE_Device.h" />
+    <ClInclude Include="src\VE_FrameInfo.h" />
     <ClInclude Include="src\VE_GameObject.h" />
     <ClInclude Include="src\VE_Model.h" />
     <ClInclude Include="src\VE_Pipeline.h" />

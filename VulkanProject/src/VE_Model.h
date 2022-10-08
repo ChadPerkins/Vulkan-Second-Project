@@ -1,4 +1,5 @@
 #pragma once
+#include "VE_Buffer.h"
 #include "VE_Device.h"
 
 #define GLM_FORCE_RADIANS
@@ -58,14 +59,13 @@ namespace VulkanEngine {
 
 	private:
 		VEDevice& m_Device;
-		VkBuffer m_VertexBuffer;
-		VkDeviceMemory m_VertexBufferMemory;
+
+		std::unique_ptr<VEBuffer> m_VertexBuffer;
 		uint32_t m_VertexCount;
 
 		bool m_HasIndexBuffer = false;
 
-		VkBuffer m_IndexBuffer;
-		VkDeviceMemory m_IndexBufferMemory;
+		std::unique_ptr<VEBuffer> m_IndexBuffer;
 		uint32_t m_IndexCount;
 	};
 }

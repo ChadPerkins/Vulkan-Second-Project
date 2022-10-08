@@ -2,6 +2,7 @@
 #include "InputController.h"
 #include "SimpleRenderSystem.h"
 
+#include "VE_Buffer.h"
 #include "VE_Camera.h"
 
 #define GLM_FORCE_RADIANS
@@ -17,8 +18,22 @@
 
 namespace VulkanEngine {
 
+	// Uniform buffer object
+	struct GlobalUbo
+	{
+		alignas(16) glm::mat4 ProjectionView{ 1.0f };
+		alignas(16) glm::vec3 LightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+
+	};
+
 	Application::Application()
 	{
+		globalPool = VEDescriptorPool::Builder(device)
+			.SetMaxSets(VESwapChain::MAX_FRAMES_IN_FLIGHT)
+			.AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VESwapChain::MAX_FRAMES_IN_FLIGHT)
+			.Build();
+
+
 		LoadGameObjects();
 	}
 
@@ -29,8 +44,36 @@ namespace VulkanEngine {
 
 	void Application::Run()
 	{
-		SimpleRenderSystem simpleRenderSystem(device, renderer.GetSwapChainRenderPass());
+		std::vector<std::unique_ptr<VEBuffer>> uboBuffers(VESwapChain::MAX_FRAMES_IN_FLIGHT);
 
+		for (int i = 0; i < uboBuffers.size(); i++)
+		{
+			uboBuffers[i] = std::make_unique<VEBuffer>(
+				device,
+				sizeof(GlobalUbo),
+				1,
+				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+			);
+			uboBuffers[i]->Map();
+		}
+
+		auto globalSetLayout = VEDescriptorSetLayout::Builder(device)
+			.AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.Build();
+
+		std::vector<VkDescriptorSet> globalDescriptorSets(VESwapChain::MAX_FRAMES_IN_FLIGHT);
+
+		for (int i = 0; i < globalDescriptorSets.size(); i++)
+		{
+			auto bufferInfo = uboBuffers[i]->DescriptorInfo();
+
+			VEDescriptorWriter(*globalSetLayout, *globalPool)
+				.WriteBuffer(0, &bufferInfo)
+				.Build(globalDescriptorSets[i]);
+		}
+
+		SimpleRenderSystem simpleRenderSystem(device, renderer.GetSwapChainRenderPass(), globalSetLayout->GetDescriptorSetLayout());
 		VECamera camera = {};
 
 		auto viewerObject = VEGameObject::CreateGameObject();
@@ -55,8 +98,24 @@ namespace VulkanEngine {
 			
 			if (auto commandBuffer = renderer.BeginFrame())
 			{
+				uint32_t frameIndex = renderer.GetFrameIndex();
+				FrameInfo frameInfo = {
+					frameIndex,
+					frameTime,
+					commandBuffer,
+					camera,
+					globalDescriptorSets[frameIndex]
+				};
+
+				// Update
+				GlobalUbo ubo = {};
+				ubo.ProjectionView = camera.GetProjection() * camera.GetView();
+				uboBuffers[frameIndex]->WriteToBuffer(&ubo);
+				uboBuffers[frameIndex]->Flush();
+
+				// Render
 				renderer.BeginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.RenderGameObjects(commandBuffer, gameObjects, camera);
+				simpleRenderSystem.RenderGameObjects(frameInfo, gameObjects);
 				renderer.EndSwapChainRenderPass(commandBuffer);
 				renderer.EndFrame();
 			}

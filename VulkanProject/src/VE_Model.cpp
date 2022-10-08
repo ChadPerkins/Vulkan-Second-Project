@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 namespace std {
+
 	template <>
 	struct hash<VulkanEngine::VEModel::Vertex>
 	{
@@ -25,7 +26,7 @@ namespace std {
 namespace VulkanEngine {
 
 	VEModel::VEModel(VEDevice& device, const VEModel::Builder& builder)
-		: m_Device{device}
+		: m_Device{ device }
 	{
 		CreateVertexBuffers(builder.Vertices);
 		CreateIndexBuffers(builder.Indices);
@@ -33,15 +34,6 @@ namespace VulkanEngine {
 
 	VEModel::~VEModel()
 	{
-		vkDestroyBuffer(m_Device.Device(), m_VertexBuffer, nullptr);
-		vkFreeMemory(m_Device.Device(), m_VertexBufferMemory, nullptr);
-
-		if (m_HasIndexBuffer)
-		{
-			vkDestroyBuffer(m_Device.Device(), m_IndexBuffer, nullptr);
-			vkFreeMemory(m_Device.Device(), m_IndexBufferMemory, nullptr);
-
-		}
 	}
 
 	std::unique_ptr<VEModel> VEModel::CreateModelFromFile(VEDevice& device, const std::string& filepath)
@@ -58,37 +50,29 @@ namespace VulkanEngine {
 		assert(m_VertexCount >= 3 && "Vertex count must be atleast 3.");
 
 		VkDeviceSize bufferSize = sizeof(vertices[0]) * m_VertexCount;
+		uint32_t vertexSize = sizeof(vertices[0]);
 
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-
-		// Create a staging buffer of the required size on the GPU
-		m_Device.CreateBuffer(bufferSize,
+		VEBuffer stagingBuffer = {
+			m_Device,
+			vertexSize,
+			m_VertexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer,
-			stagingBufferMemory);
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
 
-		void* data;
-		// Map the memory from the CPU to the buffer created on the GPU
-		vkMapMemory(m_Device.Device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		// Copy the data to the CPU which will get sent to the GPU
-		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-		// Unmap the link between the CPU and GPU since the data on the CPU is no longer needed
-		vkUnmapMemory(m_Device.Device(), stagingBufferMemory);
+		stagingBuffer.Map();
+		stagingBuffer.WriteToBuffer((void*)vertices.data());
 
-		// Create a vertex buffer of the required size on the GPU
-		m_Device.CreateBuffer(bufferSize,
+		m_VertexBuffer = std::make_unique<VEBuffer>(
+			m_Device,
+			vertexSize,
+			m_VertexCount,
 			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			m_VertexBuffer,
-			m_VertexBufferMemory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+			);
 
 		// Copy the data from the staging buffer into the vertex buffer
-		m_Device.CopyBuffer(stagingBuffer, m_VertexBuffer, bufferSize);
-
-		vkDestroyBuffer(m_Device.Device(), stagingBuffer, nullptr);
-		vkFreeMemory(m_Device.Device(), stagingBufferMemory, nullptr);
+		m_Device.CopyBuffer(stagingBuffer.GetBuffer(), m_VertexBuffer->GetBuffer(), bufferSize);
 	}
 
 	void VEModel::CreateIndexBuffers(const std::vector<uint32_t>& indices)
@@ -105,37 +89,29 @@ namespace VulkanEngine {
 		}
 
 		VkDeviceSize bufferSize = sizeof(indices[0]) * m_IndexCount;
+		uint32_t indexSize = sizeof(indices[0]);
 
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-
-		// Create a staging buffer of the required size on the GPU
-		m_Device.CreateBuffer(bufferSize,
+		VEBuffer stagingBuffer = {
+			m_Device,
+			indexSize,
+			m_IndexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer,
-			stagingBufferMemory);
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
 
-		void* data;
-		// Map the memory from the CPU to the buffer created on the GPU
-		vkMapMemory(m_Device.Device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		// Copy the data to the CPU which will get sent to the GPU
-		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-		// Unmap the link between the CPU and GPU since the data on the CPU is no longer needed
-		vkUnmapMemory(m_Device.Device(), stagingBufferMemory);
+		stagingBuffer.Map();
+		stagingBuffer.WriteToBuffer((void*)indices.data());
 
-		// Create a index buffer of the required size on the GPU
-		m_Device.CreateBuffer(bufferSize,
+		m_IndexBuffer = std::make_unique<VEBuffer>(
+			m_Device,
+			indexSize,
+			m_IndexCount,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			m_IndexBuffer,
-			m_IndexBufferMemory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+			);
 
 		// Copy the data from the staging buffer into the index buffer
-		m_Device.CopyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
-
-		vkDestroyBuffer(m_Device.Device(), stagingBuffer, nullptr);
-		vkFreeMemory(m_Device.Device(), stagingBufferMemory, nullptr);
+		m_Device.CopyBuffer(stagingBuffer.GetBuffer(), m_IndexBuffer->GetBuffer(), bufferSize);
 	}
 
 	void VEModel::Draw(VkCommandBuffer commandBuffer)
@@ -148,19 +124,18 @@ namespace VulkanEngine {
 		{
 			vkCmdDraw(commandBuffer, m_VertexCount, 1, 0, 0);
 		}
-
 	}
 
 	void VEModel::Bind(VkCommandBuffer commandBuffer)
 	{
-		VkBuffer buffers[]					= { m_VertexBuffer };
-		VkDeviceSize offsets[]				= { 0 };
+		VkBuffer buffers[] = { m_VertexBuffer->GetBuffer() };
+		VkDeviceSize offsets[] = { 0 };
 
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 
 		if (m_HasIndexBuffer)
 		{
-			vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+			vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		}
 	}
 
@@ -168,9 +143,9 @@ namespace VulkanEngine {
 	{
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
 
-		bindingDescriptions[0].binding		= 0;
-		bindingDescriptions[0].stride		= sizeof(Vertex);
-		bindingDescriptions[0].inputRate	= VK_VERTEX_INPUT_RATE_VERTEX;
+		bindingDescriptions[0].binding = 0;
+		bindingDescriptions[0].stride = sizeof(Vertex);
+		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 		return bindingDescriptions;
 	}

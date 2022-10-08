@@ -1,6 +1,7 @@
 #pragma once
 #include "VE_Camera.h"
 #include "VE_Device.h"
+#include "VE_FrameInfo.h"
 #include "VE_GameObject.h"
 #include "VE_Pipeline.h"
 
@@ -13,19 +14,17 @@ namespace VulkanEngine {
 	class SimpleRenderSystem
 	{
 	public:
-		SimpleRenderSystem(VEDevice& device, VkRenderPass renderPass);
+		SimpleRenderSystem(VEDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
 
 		// Delete the copy constructor and copy operator
 		SimpleRenderSystem(const SimpleRenderSystem&) = delete;
 		SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
-		void RenderGameObjects(VkCommandBuffer commandBuffer,
-			std::vector<VEGameObject>& gameObjects,
-			const VECamera& camera);
+		void RenderGameObjects(FrameInfo& frameInfo, std::vector<VEGameObject>& gameObjects);
 
 	private:
-		void CreatePipelineLayout();
+		void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void CreatePipeline(VkRenderPass renderPass);
 
 	private:

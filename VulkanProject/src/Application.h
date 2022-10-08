@@ -1,4 +1,5 @@
 #pragma once
+#include "VE_Descriptors.h"
 #include "VE_Device.h"
 #include "VE_GameObject.h"
 #include "VE_Window.h"
@@ -39,6 +40,8 @@ namespace VulkanEngine {
 		VEWindow window{ WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE };
 		VEDevice device{ window };
 		VERenderer renderer{ window, device };
-		std::vector<VEGameObject> gameObjects;;
+
+		std::unique_ptr<VEDescriptorPool> globalPool{};
+		std::vector<VEGameObject> gameObjects;
 	};
 }
