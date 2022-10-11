@@ -72,7 +72,7 @@ namespace VulkanEngine {
 			pipelineConfig);
 	}
 
-	void SimpleRenderSystem::RenderGameObjects(FrameInfo& frameInfo, std::vector<VEGameObject>& gameObjects)
+	void SimpleRenderSystem::RenderGameObjects(FrameInfo& frameInfo)
 	{
 		m_Pipeline->Bind(frameInfo.CommandBuffer);
 
@@ -85,8 +85,15 @@ namespace VulkanEngine {
 			0,
 			nullptr);
 
-		for (auto& obj : gameObjects)
+		for (auto& kv : frameInfo.GameObjects)
 		{
+			auto& obj = kv.second;
+
+			if (obj.m_Model == nullptr)
+			{
+				continue;
+			}
+
 			SimplePushConstantData push = {};
 
 			push.ModelMatrix						= obj.m_Transform.Mat4();

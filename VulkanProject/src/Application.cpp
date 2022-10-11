@@ -60,7 +60,7 @@ namespace VulkanEngine {
 		}
 
 		auto globalSetLayout = VEDescriptorSetLayout::Builder(device)
-			.AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.Build();
 
 		std::vector<VkDescriptorSet> globalDescriptorSets(VESwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -105,7 +105,8 @@ namespace VulkanEngine {
 					frameTime,
 					commandBuffer,
 					camera,
-					globalDescriptorSets[frameIndex]
+					globalDescriptorSets[frameIndex],
+					gameObjects
 				};
 
 				// Update
@@ -116,7 +117,7 @@ namespace VulkanEngine {
 
 				// Render
 				renderer.BeginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.RenderGameObjects(frameInfo, gameObjects);
+				simpleRenderSystem.RenderGameObjects(frameInfo);
 				renderer.EndSwapChainRenderPass(commandBuffer);
 				renderer.EndFrame();
 			}
@@ -135,7 +136,7 @@ namespace VulkanEngine {
 		flatVase.m_Transform.Translation		= { -0.5f, 0.5f, 0.0f };
 		flatVase.m_Transform.Scale				= { 3.0f, 1.5f, 3.0f };
 
-		gameObjects.push_back(std::move(flatVase));
+		gameObjects.emplace(flatVase.GetId(), std::move(flatVase));
 
 		model									= VEModel::CreateModelFromFile(device, "Models/smooth_vase.obj");
 
@@ -144,7 +145,7 @@ namespace VulkanEngine {
 		smoothVase.m_Transform.Translation		= { 0.5f, 0.5f, 0.0f };
 		smoothVase.m_Transform.Scale			= { 3.0f, 1.5f, 3.0f };
 
-		gameObjects.push_back(std::move(smoothVase));
+		gameObjects.emplace(smoothVase.GetId(), std::move(smoothVase));
 
 		model = VEModel::CreateModelFromFile(device, "Models/quad.obj");
 
@@ -153,7 +154,7 @@ namespace VulkanEngine {
 		floor.m_Transform.Translation			= { 0.0f, 0.5f, 0.0f };
 		floor.m_Transform.Scale					= { 3.0f, 1.0f, 3.0f };
 
-		gameObjects.push_back(std::move(floor));
+		gameObjects.emplace(floor.GetId(), std::move(floor));
 	}
 	
 }

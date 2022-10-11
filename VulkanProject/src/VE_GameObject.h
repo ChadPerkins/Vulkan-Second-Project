@@ -4,6 +4,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <memory>
+#include <unordered_map>
 
 namespace VulkanEngine {
 
@@ -23,7 +24,8 @@ namespace VulkanEngine {
 	class VEGameObject
 	{
 	public:
-		using id_t = unsigned int;
+		using id_t	= unsigned int;
+		using Map	= std::unordered_map<id_t, VEGameObject>;
 
 		static VEGameObject CreateGameObject()
 		{

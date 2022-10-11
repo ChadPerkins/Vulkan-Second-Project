@@ -42,6 +42,6 @@ namespace VulkanEngine {
 		VERenderer renderer{ window, device };
 
 		std::unique_ptr<VEDescriptorPool> globalPool{};
-		std::vector<VEGameObject> gameObjects;
+		VEGameObject::Map gameObjects;
 	};
 }
