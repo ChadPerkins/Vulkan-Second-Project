@@ -21,9 +21,10 @@ namespace VulkanEngine {
 	// Uniform buffer object
 	struct GlobalUbo
 	{
-		alignas(16) glm::mat4 ProjectionView{ 1.0f };
-		alignas(16) glm::vec3 LightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
-
+		glm::mat4 ProjectionView{ 1.0f };
+		glm::vec4 AmbientLightColor{ 1.0f, 1.0f, 1.0f, 0.1f }; // W is the intensity
+		glm::vec3 LightPosition{ -1.0f };
+		alignas(16) glm::vec4 LightColor{ 1.0f }; // W is light intensity
 	};
 
 	Application::Application()
@@ -77,7 +78,7 @@ namespace VulkanEngine {
 		VECamera camera = {};
 
 		auto viewerObject = VEGameObject::CreateGameObject();
-
+		viewerObject.m_Transform.Translation.z = -2.5f;
 		InputController cameraController = {};
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
@@ -94,7 +95,7 @@ namespace VulkanEngine {
 			camera.SetViewYXZ(viewerObject.m_Transform.Translation, viewerObject.m_Transform.Rotation);
 
 			float aspect = renderer.GetAspectRatio();
-			camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+			camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 1000.0f);
 			
 			if (auto commandBuffer = renderer.BeginFrame())
 			{
@@ -127,23 +128,32 @@ namespace VulkanEngine {
 
 	void Application::LoadGameObjects()
 	{
-		std::shared_ptr<VEModel> model		= VEModel::CreateModelFromFile(device, "Models/flat_vase.obj");
+		std::shared_ptr<VEModel> model			= VEModel::CreateModelFromFile(device, "Models/flat_vase.obj");
 
-		auto flatVase	= VEGameObject::CreateGameObject();
+		auto flatVase		= VEGameObject::CreateGameObject();
 		flatVase.m_Model						= model;
-		flatVase.m_Transform.Translation		= { -0.5f, 0.5f, 2.5f };
-		flatVase.m_Transform.Scale			= { 3.0f, 1.5f, 3.0f };
+		flatVase.m_Transform.Translation		= { -0.5f, 0.5f, 0.0f };
+		flatVase.m_Transform.Scale				= { 3.0f, 1.5f, 3.0f };
 
 		gameObjects.push_back(std::move(flatVase));
 
-		model								 = VEModel::CreateModelFromFile(device, "Models/smooth_vase.obj");
+		model									= VEModel::CreateModelFromFile(device, "Models/smooth_vase.obj");
 
-		auto smoothVase	= VEGameObject::CreateGameObject();
+		auto smoothVase		= VEGameObject::CreateGameObject();
 		smoothVase.m_Model						= model;
-		smoothVase.m_Transform.Translation		= { 0.5f, 0.5f, 2.5f };
+		smoothVase.m_Transform.Translation		= { 0.5f, 0.5f, 0.0f };
 		smoothVase.m_Transform.Scale			= { 3.0f, 1.5f, 3.0f };
 
 		gameObjects.push_back(std::move(smoothVase));
+
+		model = VEModel::CreateModelFromFile(device, "Models/quad.obj");
+
+		auto floor			= VEGameObject::CreateGameObject();
+		floor.m_Model							= model;
+		floor.m_Transform.Translation			= { 0.0f, 0.5f, 0.0f };
+		floor.m_Transform.Scale					= { 3.0f, 1.0f, 3.0f };
+
+		gameObjects.push_back(std::move(floor));
 	}
 	
 }
