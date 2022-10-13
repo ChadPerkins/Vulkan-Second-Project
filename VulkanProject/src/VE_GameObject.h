@@ -21,6 +21,11 @@ namespace VulkanEngine {
 		glm::mat3 NormalMatrix();
 	};
 
+	struct PointLightComponent
+	{
+		float LightIntensity = 1.0f;
+	};
+
 	class VEGameObject
 	{
 	public:
@@ -33,6 +38,10 @@ namespace VulkanEngine {
 			return VEGameObject(currentId++);
 		}
 
+		static VEGameObject MakePointLight(float intensity = 10.0f,
+			float radius = 0.1f,
+			glm::vec3 color = glm::vec3(1.0f));
+
 		VEGameObject(const VEGameObject&) = delete;
 		VEGameObject& operator=(const VEGameObject&) = delete;
 		VEGameObject(VEGameObject&&) = default;
@@ -40,9 +49,12 @@ namespace VulkanEngine {
 
 		id_t GetId() { return m_Id; }
 
-		std::shared_ptr<VEModel> m_Model{};
 		glm::vec3 m_Color{};
 		TransformComponent m_Transform{};
+
+		// Optional pointer components
+		std::shared_ptr<VEModel> m_Model{};
+		std::unique_ptr< PointLightComponent> m_PointLight = nullptr;
 
 	private:
 		VEGameObject(id_t objId) : m_Id{ objId } {}

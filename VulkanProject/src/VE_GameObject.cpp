@@ -61,4 +61,14 @@ namespace VulkanEngine {
 			}
 		};
 	}
+	VEGameObject VEGameObject::MakePointLight(float intensity, float radius, glm::vec3 color)
+	{
+		VEGameObject gameObj = VEGameObject::CreateGameObject();
+		gameObj.m_Color							= color;
+		gameObj.m_Transform.Scale.x				= radius;
+		gameObj.m_PointLight					= std::make_unique<PointLightComponent>();
+		gameObj.m_PointLight->LightIntensity	= intensity;
+
+		return gameObj;
+	}
 }

@@ -19,16 +19,6 @@
 
 namespace VulkanEngine {
 
-	// Uniform buffer object
-	struct GlobalUbo
-	{
-		glm::mat4 ProjectionMatrix{ 1.0f };
-		glm::mat4 ViewMatrix{ 1.0f };
-		glm::vec4 AmbientLightColor{ 1.0f, 1.0f, 1.0f, 0.1f }; // W is the intensity
-		glm::vec3 LightPosition{ -1.0f };
-		alignas(16) glm::vec4 LightColor{ 1.0f }; // W is light intensity
-	};
-
 	Application::Application()
 	{
 		globalPool = VEDescriptorPool::Builder(device)
@@ -118,6 +108,7 @@ namespace VulkanEngine {
 				GlobalUbo ubo = {};
 				ubo.ProjectionMatrix = camera.GetProjection();
 				ubo.ViewMatrix =  camera.GetView();
+				pointLightSystem.Update(frameInfo, ubo);
 				uboBuffers[frameIndex]->WriteToBuffer(&ubo);
 				uboBuffers[frameIndex]->Flush();
 
@@ -162,6 +153,29 @@ namespace VulkanEngine {
 		floor.m_Transform.Scale					= { 3.0f, 1.0f, 3.0f };
 
 		gameObjects.emplace(floor.GetId(), std::move(floor));
-	}
-	
+
+		std::vector<glm::vec3> lightColors{
+			{ 1.0f, 0.1f, 0.1f },
+			{ 0.1f, 0.1f, 1.0f },
+			{ 0.1f, 1.0f, 0.1f },
+			{ 1.0f, 1.0f, 0.1f },
+			{ 0.1f, 1.0f, 1.0f },
+			{ 1.0f, 1.0f, 1.0f }
+		};
+
+		for (int i = 0; i < lightColors.size(); i++)
+		{
+			auto pointLight = VEGameObject::MakePointLight(0.2f);
+			pointLight.m_Color = lightColors[i];
+
+			// Create a circle and spread the lights evenly around the circle
+			auto rotateLight = glm::rotate(glm::mat4(1.0f),
+				i * glm::two_pi<float>() / lightColors.size(),
+				{ 0.0f, -1.0f, 0.0f });
+
+			pointLight.m_Transform.Translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, -1.0f));
+
+			gameObjects.emplace(pointLight.GetId(), std::move(pointLight));
+		}
+	}	
 }
