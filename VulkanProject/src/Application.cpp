@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "InputController.h"
-#include "SimpleRenderSystem.h"
+#include "Systems/SimpleRenderSystem.h"
+#include "Systems/PointLightSystem.h"
 
 #include "VE_Buffer.h"
 #include "VE_Camera.h"
@@ -21,7 +22,8 @@ namespace VulkanEngine {
 	// Uniform buffer object
 	struct GlobalUbo
 	{
-		glm::mat4 ProjectionView{ 1.0f };
+		glm::mat4 ProjectionMatrix{ 1.0f };
+		glm::mat4 ViewMatrix{ 1.0f };
 		glm::vec4 AmbientLightColor{ 1.0f, 1.0f, 1.0f, 0.1f }; // W is the intensity
 		glm::vec3 LightPosition{ -1.0f };
 		alignas(16) glm::vec4 LightColor{ 1.0f }; // W is light intensity
@@ -75,6 +77,9 @@ namespace VulkanEngine {
 		}
 
 		SimpleRenderSystem simpleRenderSystem(device, renderer.GetSwapChainRenderPass(), globalSetLayout->GetDescriptorSetLayout());
+		
+		PointLightSystem pointLightSystem(device, renderer.GetSwapChainRenderPass(), globalSetLayout->GetDescriptorSetLayout());
+
 		VECamera camera = {};
 
 		auto viewerObject = VEGameObject::CreateGameObject();
@@ -111,13 +116,15 @@ namespace VulkanEngine {
 
 				// Update
 				GlobalUbo ubo = {};
-				ubo.ProjectionView = camera.GetProjection() * camera.GetView();
+				ubo.ProjectionMatrix = camera.GetProjection();
+				ubo.ViewMatrix =  camera.GetView();
 				uboBuffers[frameIndex]->WriteToBuffer(&ubo);
 				uboBuffers[frameIndex]->Flush();
 
 				// Render
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.RenderGameObjects(frameInfo);
+				pointLightSystem.Render(frameInfo);
 				renderer.EndSwapChainRenderPass(commandBuffer);
 				renderer.EndFrame();
 			}

@@ -67,8 +67,8 @@ namespace VulkanEngine {
 		pipelineConfig.PipelineLayout				= m_PipelineLayout;
 
 		m_Pipeline = std::make_unique<VEPipeline>(m_Device,
-			"shaders/simple_shader.vert.spv",
-			"shaders/simple_shader.frag.spv",
+			"Shaders/Simple_Shader.vert.spv",
+			"Shaders/Simple_Shader.frag.spv",
 			pipelineConfig);
 	}
 

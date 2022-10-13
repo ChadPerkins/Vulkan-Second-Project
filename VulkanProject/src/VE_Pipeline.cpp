@@ -77,8 +77,8 @@ namespace VulkanEngine {
 		shaderStages[1].pNext									= nullptr;
 		shaderStages[1].pSpecializationInfo						= nullptr;
 
-		auto bindingDescriptions = VEModel::Vertex::GetBindingDescriptions();
-		auto attributeDescriptions = VEModel::Vertex::GetAttributeDescriptions();
+		auto& bindingDescriptions			= configInfo.BindingDescriptions;
+		auto& attributeDescriptions		= configInfo.AttributeDescriptions;
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 
@@ -207,5 +207,7 @@ namespace VulkanEngine {
 		configInfo.DynamicStateInfo.dynamicStateCount			= static_cast<uint32_t>(configInfo.DynamicStateEnables.size());
 		configInfo.DynamicStateInfo.flags						= 0;
 
+		configInfo.BindingDescriptions							= VEModel::Vertex::GetBindingDescriptions();
+		configInfo.AttributeDescriptions						= VEModel::Vertex::GetAttributeDescriptions();
 	}
 }
