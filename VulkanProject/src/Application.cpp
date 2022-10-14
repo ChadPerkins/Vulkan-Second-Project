@@ -115,8 +115,11 @@ namespace VulkanEngine {
 
 				// Render
 				renderer.BeginSwapChainRenderPass(commandBuffer);
+
+				// The order in which objects get rendered matters
 				simpleRenderSystem.RenderGameObjects(frameInfo);
 				pointLightSystem.Render(frameInfo);
+
 				renderer.EndSwapChainRenderPass(commandBuffer);
 				renderer.EndFrame();
 			}

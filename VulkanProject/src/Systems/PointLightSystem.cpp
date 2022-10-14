@@ -7,7 +7,7 @@
 
 #include <array>
 #include <cassert>
-#include <iostream>
+#include <map>
 #include <stdexcept>
 
 namespace VulkanEngine {
@@ -63,6 +63,7 @@ namespace VulkanEngine {
 		PipelineConfigInfo pipelineConfig = {};
 
 		VEPipeline::DefaultPipelineConfigInfo(pipelineConfig);
+		VEPipeline::EnableAlphaBlending(pipelineConfig);
 
 		pipelineConfig.BindingDescriptions.clear();
 		pipelineConfig.AttributeDescriptions.clear();
@@ -111,6 +112,24 @@ namespace VulkanEngine {
 
 	void PointLightSystem::Render(FrameInfo& frameInfo)
 	{
+		// Sorting the lights
+		std::map<float, VEGameObject::id_t> sortedLights;
+
+		for (auto& kv : frameInfo.GameObjects)
+		{
+			auto& obj = kv.second;
+
+			if (obj.m_PointLight == nullptr)
+			{
+				continue;
+			}
+
+			// Calculate the distance of the light
+			auto offset = frameInfo.Camera.GetPosition() - obj.m_Transform.Translation;
+			float distanceSquared = glm::dot(offset, offset);
+			sortedLights[distanceSquared] = obj.GetId();
+		}
+
 		m_Pipeline->Bind(frameInfo.CommandBuffer);
 
 		vkCmdBindDescriptorSets(frameInfo.CommandBuffer,
@@ -122,14 +141,11 @@ namespace VulkanEngine {
 			0,
 			nullptr);
 
-		for (auto& kv : frameInfo.GameObjects)
+		// Iterate through the sorted lights map in reverse order
+		for (auto it = sortedLights.rbegin(); it != sortedLights.rend(); ++it)
 		{
-			auto& obj = kv.second;
-
-			if (obj.m_PointLight == nullptr)
-			{
-				continue;
-			}
+			// Use the game obj to find the light object
+			auto& obj = frameInfo.GameObjects.at(it->second);
 
 			PointLightPushConstants push = {};
 
