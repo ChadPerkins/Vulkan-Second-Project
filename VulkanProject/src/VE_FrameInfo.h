@@ -19,6 +19,7 @@ namespace VulkanEngine {
 	{
 		glm::mat4 ProjectionMatrix{ 1.0f };
 		glm::mat4 ViewMatrix{ 1.0f };
+		glm::mat4 InverseViewMatrix{ 1.0f };
 		glm::vec4 AmbientLightColor{ 1.0f, 1.0f, 1.0f, 0.1f }; // W is the intensity
 		
 		PointLight PointLights[MAX_LIGHTS];

@@ -23,12 +23,14 @@ namespace VulkanEngine {
 
 		void SetViewYXZ(glm::vec3 position, glm::vec3 rotation);
 
-		const glm::mat4& GetProjection() const { return m_ProjectionMatrix; }
-		const glm::mat4& GetView() const { return m_ViewMatrix; }
+		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
+		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
+		const glm::mat4& GetInverseViewMatrix() const { return m_InverseViewMatrix; }
 
 	private:
 		glm::mat4 m_ProjectionMatrix{ 1.0f };
 		glm::mat4 m_ViewMatrix{1.0f};
+		glm::mat4 m_InverseViewMatrix{ 1.0f };
 
 	};
 }

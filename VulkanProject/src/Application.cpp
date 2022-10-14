@@ -106,8 +106,9 @@ namespace VulkanEngine {
 
 				// Update
 				GlobalUbo ubo = {};
-				ubo.ProjectionMatrix = camera.GetProjection();
-				ubo.ViewMatrix =  camera.GetView();
+				ubo.ProjectionMatrix = camera.GetProjectionMatrix();
+				ubo.ViewMatrix =  camera.GetViewMatrix();
+				ubo.InverseViewMatrix = camera.GetInverseViewMatrix();
 				pointLightSystem.Update(frameInfo, ubo);
 				uboBuffers[frameIndex]->WriteToBuffer(&ubo);
 				uboBuffers[frameIndex]->Flush();

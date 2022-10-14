@@ -20,6 +20,7 @@ layout (location = 0) out vec2 fragOffset;
 layout (set = 0, binding = 0) uniform GlobalUbo {
 	mat4 projectionMatrix;
 	mat4 viewMatrix;
+	mat4 inverseViewMatrix;
 	vec4 ambientLightColor; // W is intensity
 	PointLight pointLights[10];
 	int numLights;
